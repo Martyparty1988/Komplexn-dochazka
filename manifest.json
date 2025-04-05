@@ -1,7 +1,7 @@
 {
   "name": "Pracovní výkazy & Finance",
   "short_name": "Výkazy & Finance",
-  "description": "Aplikace pro správu pracovních výkazů a financí",
+  "description": "Aplikace pro správu pracovních výkazů, financí a dluhů",
   "start_url": "/index.html",
   "display": "standalone",
   "background_color": "#f5f5f7",
@@ -31,6 +31,11 @@
       "name": "Finance",
       "url": "/index.html?section=finances",
       "description": "Správa financí"
+    },
+    {
+      "name": "Dluh",
+      "url": "/index.html?section=debt",
+      "description": "Správa dluhů"
     }
   ],
   "categories": ["productivity", "finance", "utilities"],
