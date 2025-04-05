@@ -17,6 +17,7 @@
         <nav>
             <button id="nav-reports" class="active">Výkazy</button>
             <button id="nav-finances">Finance</button>
+            <button id="nav-debt">Dluh</button>
             <button id="nav-summary">Souhrn</button>
         </nav>
     </header>
@@ -86,8 +87,15 @@
                             <input type="text" id="timer-hours" disabled>
                         </div>
                         <div class="form-group">
-                            <label for="timer-earnings">Výdělek (Kč):</label>
+                            <label for="timer-earnings">Výdělek:</label>
                             <input type="text" id="timer-earnings" disabled>
+                        </div>
+                        <div class="form-group">
+                            <label for="timer-currency">Měna:</label>
+                            <select id="timer-currency">
+                                <option value="CZK">CZK</option>
+                                <option value="EUR">EUR</option>
+                            </select>
                         </div>
                     </div>
                     <button id="save-timer" class="btn primary-btn">Uložit záznam</button>
@@ -120,6 +128,13 @@
                         </select>
                         <input type="text" id="manual-custom-category" placeholder="Vlastní kategorie" class="hidden">
                     </div>
+                    <div class="form-group">
+                        <label for="manual-currency">Měna:</label>
+                        <select id="manual-currency">
+                            <option value="CZK">CZK</option>
+                            <option value="EUR">EUR</option>
+                        </select>
+                    </div>
                 </div>
                 <div class="form-row">
                     <div class="form-group">
@@ -141,7 +156,7 @@
                         <input type="text" id="manual-hours" placeholder="Např. 2:30, 2.5, 150">
                     </div>
                     <div class="form-group">
-                        <label for="manual-earnings">Výdělek (Kč):</label>
+                        <label for="manual-earnings">Výdělek:</label>
                         <input type="text" id="manual-earnings" disabled>
                     </div>
                 </div>
@@ -164,6 +179,14 @@
                         </select>
                     </div>
                     <div class="form-group">
+                        <label for="filter-currency">Filtr dle měny:</label>
+                        <select id="filter-currency">
+                            <option value="">Všechny</option>
+                            <option value="CZK">CZK</option>
+                            <option value="EUR">EUR</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
                         <button id="clear-filters" class="btn">Zrušit filtry</button>
                     </div>
                 </div>
@@ -181,7 +204,8 @@
                             <th>Konec</th>
                             <th>Pauza (min)</th>
                             <th>Odprac. (hod)</th>
-                            <th>Výdělek (Kč)</th>
+                            <th>Výdělek</th>
+                            <th>Měna</th>
                             <th>Akce</th>
                         </tr>
                     </thead>
@@ -218,10 +242,17 @@
                             <option value="expense">Výdaj</option>
                         </select>
                     </div>
+                    <div class="form-group">
+                        <label for="finance-currency">Měna:</label>
+                        <select id="finance-currency">
+                            <option value="CZK">CZK</option>
+                            <option value="EUR">EUR</option>
+                        </select>
+                    </div>
                 </div>
                 <div class="form-row">
                     <div class="form-group">
-                        <label for="finance-amount">Částka (Kč):</label>
+                        <label for="finance-amount">Částka:</label>
                         <input type="number" id="finance-amount" min="0" step="0.01" required>
                     </div>
                     <div class="form-group">
@@ -231,6 +262,17 @@
                             <option value="Maru">Maru</option>
                             <option value="Marty">Marty</option>
                         </select>
+                    </div>
+                    <div class="form-group">
+                        <label for="finance-category">Kategorie:</label>
+                        <select id="finance-category">
+                            <option value="Výplata">Výplata</option>
+                            <option value="Záloha">Záloha</option>
+                            <option value="Nájem">Nájem</option>
+                            <option value="Nákup">Nákup</option>
+                            <option value="custom">+ Vlastní kategorie</option>
+                        </select>
+                        <input type="text" id="finance-custom-category" placeholder="Vlastní kategorie" class="hidden">
                     </div>
                 </div>
                 <div class="form-row">
@@ -245,12 +287,22 @@
                         <input type="number" id="finance-debt-ratio" min="0" max="100" value="0">
                     </div>
                     <div class="form-group">
-                        <label for="finance-debt-amount">Částka splátky (Kč):</label>
-                        <input type="number" id="finance-debt-amount" disabled>
+                        <label for="finance-rent-payment">Splátka nájmu:</label>
+                        <input type="number" id="finance-rent-payment" disabled>
                     </div>
                     <div class="form-group">
-                        <label for="finance-payout">Vyplaceno (Kč):</label>
+                        <label for="finance-other-debt-payment">Splátka ostat. dluhu:</label>
+                        <input type="number" id="finance-other-debt-payment" disabled>
+                    </div>
+                    <div class="form-group">
+                        <label for="finance-payout">Vyplaceno:</label>
                         <input type="number" id="finance-payout" disabled>
+                    </div>
+                </div>
+                <div class="form-row">
+                    <div class="form-group">
+                        <label for="finance-paid-amount">Reálně vyplaceno:</label>
+                        <input type="number" id="finance-paid-amount" min="0" step="0.01" value="0">
                     </div>
                 </div>
                 <button id="save-finance" class="btn primary-btn">Uložit záznam</button>
@@ -281,6 +333,14 @@
                         </select>
                     </div>
                     <div class="form-group">
+                        <label for="filter-finance-currency">Filtr dle měny:</label>
+                        <select id="filter-finance-currency">
+                            <option value="">Všechny</option>
+                            <option value="CZK">CZK</option>
+                            <option value="EUR">EUR</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
                         <button id="clear-finance-filters" class="btn">Zrušit filtry</button>
                     </div>
                 </div>
@@ -294,9 +354,13 @@
                             <th>Datum</th>
                             <th>Typ</th>
                             <th>Osoba</th>
-                            <th>Částka (Kč)</th>
-                            <th>Splátka dluhu (Kč)</th>
-                            <th>Vyplaceno (Kč)</th>
+                            <th>Kategorie</th>
+                            <th>Částka</th>
+                            <th>Měna</th>
+                            <th>Splátka nájmu</th>
+                            <th>Splátka ost. dluhu</th>
+                            <th>K vyplacení</th>
+                            <th>Reálně vyplaceno</th>
                             <th>Poznámka</th>
                             <th>Akce</th>
                         </tr>
@@ -307,6 +371,328 @@
                 </table>
                 <div id="no-finances-message" class="hidden">
                     <p>Zatím nebyly zaznamenány žádné finanční transakce.</p>
+                </div>
+            </div>
+        </section>
+
+        <!-- Sekce dluhů -->
+        <section id="debt-section" class="section">
+            <div class="section-header">
+                <h2>Dluh</h2>
+                <div class="action-buttons">
+                    <button id="add-debt" class="btn primary-btn">
+                        <i class="fas fa-plus"></i> Přidat dluh
+                    </button>
+                    <button id="add-debt-payment" class="btn success-btn">
+                        <i class="fas fa-money-bill"></i> Přidat splátku
+                    </button>
+                </div>
+            </div>
+
+            <!-- Formulář pro přidání dluhu -->
+            <div id="debt-form" class="input-form hidden">
+                <div class="form-row">
+                    <div class="form-group">
+                        <label for="debt-date">Datum:</label>
+                        <input type="date" id="debt-date" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="debt-person">Osoba:</label>
+                        <select id="debt-person" required>
+                            <option value="Maru">Maru</option>
+                            <option value="Marty">Marty</option>
+                            <option value="Společný">Společný</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label for="debt-type">Typ:</label>
+                        <select id="debt-type" required>
+                            <option value="rent">Nájem</option>
+                            <option value="other">Ostatní</option>
+                        </select>
+                    </div>
+                </div>
+                <div class="form-row">
+                    <div class="form-group">
+                        <label for="debt-amount">Částka:</label>
+                        <input type="number" id="debt-amount" min="0" step="0.01" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="debt-currency">Měna:</label>
+                        <select id="debt-currency">
+                            <option value="CZK">CZK</option>
+                            <option value="EUR">EUR</option>
+                        </select>
+                    </div>
+                    <div class="form-group wide">
+                        <label for="debt-note">Poznámka:</label>
+                        <input type="text" id="debt-note">
+                    </div>
+                </div>
+                <button id="save-debt" class="btn primary-btn">Uložit dluh</button>
+                <button id="cancel-debt" class="btn">Zrušit</button>
+            </div>
+
+            <!-- Formulář pro přidání splátky dluhu -->
+            <div id="debt-payment-form" class="input-form hidden">
+                <div class="form-row">
+                    <div class="form-group">
+                        <label for="debt-payment-date">Datum:</label>
+                        <input type="date" id="debt-payment-date" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="debt-payment-person">Osoba:</label>
+                        <select id="debt-payment-person" required>
+                            <option value="Maru">Maru</option>
+                            <option value="Marty">Marty</option>
+                            <option value="Společný">Společný</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label for="debt-payment-type">Typ splátky:</label>
+                        <select id="debt-payment-type" required>
+                            <option value="rent">Nájem</option>
+                            <option value="other">Ostatní dluh</option>
+                        </select>
+                    </div>
+                </div>
+                <div class="form-row">
+                    <div class="form-group">
+                        <label for="debt-payment-amount">Částka:</label>
+                        <input type="number" id="debt-payment-amount" min="0" step="0.01" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="debt-payment-currency">Měna:</label>
+                        <select id="debt-payment-currency">
+                            <option value="CZK">CZK</option>
+                            <option value="EUR">EUR</option>
+                        </select>
+                    </div>
+                    <div class="form-group wide">
+                        <label for="debt-payment-note">Poznámka:</label>
+                        <input type="text" id="debt-payment-note">
+                    </div>
+                </div>
+                <button id="save-debt-payment" class="btn primary-btn">Uložit splátku</button>
+                <button id="cancel-debt-payment" class="btn">Zrušit</button>
+            </div>
+
+            <!-- Karty s informacemi o dluhu -->
+            <div class="debt-summary-cards">
+                <div class="debt-card">
+                    <h3>Maru - Přehled dluhu</h3>
+                    <div class="debt-info">
+                        <div class="debt-item">
+                            <span class="label">Počáteční dluh:</span>
+                            <span id="maru-initial-debt-czk" class="value">0 Kč</span>
+                        </div>
+                        <div class="debt-item">
+                            <span class="label">Nájem celkem:</span>
+                            <span id="maru-rent-debt-czk" class="value">0 Kč</span>
+                        </div>
+                        <div class="debt-item">
+                            <span class="label">Ostatní dluh:</span>
+                            <span id="maru-other-debt-czk" class="value">0 Kč</span>
+                        </div>
+                        <div class="debt-item">
+                            <span class="label">Splátky celkem:</span>
+                            <span id="maru-payments-czk" class="value">0 Kč</span>
+                        </div>
+                        <div class="debt-item highlight">
+                            <span class="label">Aktuální dluh:</span>
+                            <span id="maru-current-debt-czk" class="value">0 Kč</span>
+                        </div>
+                    </div>
+                    <div class="debt-info mt-2">
+                        <div class="debt-item">
+                            <span class="label">Počáteční dluh:</span>
+                            <span id="maru-initial-debt-eur" class="value">0 €</span>
+                        </div>
+                        <div class="debt-item">
+                            <span class="label">Nájem celkem:</span>
+                            <span id="maru-rent-debt-eur" class="value">0 €</span>
+                        </div>
+                        <div class="debt-item">
+                            <span class="label">Ostatní dluh:</span>
+                            <span id="maru-other-debt-eur" class="value">0 €</span>
+                        </div>
+                        <div class="debt-item">
+                            <span class="label">Splátky celkem:</span>
+                            <span id="maru-payments-eur" class="value">0 €</span>
+                        </div>
+                        <div class="debt-item highlight">
+                            <span class="label">Aktuální dluh:</span>
+                            <span id="maru-current-debt-eur" class="value">0 €</span>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="debt-card">
+                    <h3>Marty - Přehled dluhu</h3>
+                    <div class="debt-info">
+                        <div class="debt-item">
+                            <span class="label">Počáteční dluh:</span>
+                            <span id="marty-initial-debt-czk" class="value">0 Kč</span>
+                        </div>
+                        <div class="debt-item">
+                            <span class="label">Nájem celkem:</span>
+                            <span id="marty-rent-debt-czk" class="value">0 Kč</span>
+                        </div>
+                        <div class="debt-item">
+                            <span class="label">Ostatní dluh:</span>
+                            <span id="marty-other-debt-czk" class="value">0 Kč</span>
+                        </div>
+                        <div class="debt-item">
+                            <span class="label">Splátky celkem:</span>
+                            <span id="marty-payments-czk" class="value">0 Kč</span>
+                        </div>
+                        <div class="debt-item highlight">
+                            <span class="label">Aktuální dluh:</span>
+                            <span id="marty-current-debt-czk" class="value">0 Kč</span>
+                        </div>
+                    </div>
+                    <div class="debt-info mt-2">
+                        <div class="debt-item">
+                            <span class="label">Počáteční dluh:</span>
+                            <span id="marty-initial-debt-eur" class="value">0 €</span>
+                        </div>
+                        <div class="debt-item">
+                            <span class="label">Nájem celkem:</span>
+                            <span id="marty-rent-debt-eur" class="value">0 €</span>
+                        </div>
+                        <div class="debt-item">
+                            <span class="label">Ostatní dluh:</span>
+                            <span id="marty-other-debt-eur" class="value">0 €</span>
+                        </div>
+                        <div class="debt-item">
+                            <span class="label">Splátky celkem:</span>
+                            <span id="marty-payments-eur" class="value">0 €</span>
+                        </div>
+                        <div class="debt-item highlight">
+                            <span class="label">Aktuální dluh:</span>
+                            <span id="marty-current-debt-eur" class="value">0 €</span>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="debt-card">
+                    <h3>Nastavení dluhu</h3>
+                    <div class="debt-settings">
+                        <div class="form-row">
+                            <div class="form-group">
+                                <label for="monthly-rent-amount">Měsíční nájem (CZK):</label>
+                                <input type="number" id="monthly-rent-amount" value="20400" step="100">
+                            </div>
+                            <div class="form-group">
+                                <label for="monthly-rent-amount-eur">Měsíční nájem (EUR):</label>
+                                <input type="number" id="monthly-rent-amount-eur" value="800" step="10">
+                            </div>
+                        </div>
+                        <div class="form-row">
+                            <div class="form-group">
+                                <label for="auto-add-rent">Automatické přičítání nájmu:</label>
+                                <select id="auto-add-rent">
+                                    <option value="1">1. den v měsíci</option>
+                                    <option value="15">15. den v měsíci</option>
+                                    <option value="25">25. den v měsíci</option>
+                                    <option value="0">Nepřičítat automaticky</option>
+                                </select>
+                            </div>
+                            <div class="form-group">
+                                <label for="initial-debt-person">Nastavit počáteční dluh:</label>
+                                <select id="initial-debt-person">
+                                    <option value="Maru">Maru</option>
+                                    <option value="Marty">Marty</option>
+                                </select>
+                                </div>
+                        </div>
+                        <div class="form-row">
+                            <div class="form-group">
+                                <label for="initial-debt-amount">Částka:</label>
+                                <input type="number" id="initial-debt-amount" min="0" step="0.01">
+                            </div>
+                            <div class="form-group">
+                                <label for="initial-debt-currency">Měna:</label>
+                                <select id="initial-debt-currency">
+                                    <option value="CZK">CZK</option>
+                                    <option value="EUR">EUR</option>
+                                </select>
+                            </div>
+                            <div class="form-group">
+                                <label for="initial-debt-type">Typ dluhu:</label>
+                                <select id="initial-debt-type">
+                                    <option value="rent">Nájem</option>
+                                    <option value="other">Ostatní</option>
+                                </select>
+                            </div>
+                        </div>
+                        <button id="set-initial-debt" class="btn">Nastavit počáteční dluh</button>
+                        <button id="add-monthly-rent" class="btn primary-btn mt-1">Přidat měsíční nájem</button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Filtry pro dluh -->
+            <div class="filters">
+                <div class="form-row">
+                    <div class="form-group">
+                        <label for="filter-debt-person">Filtr dle osoby:</label>
+                        <select id="filter-debt-person">
+                            <option value="">Všichni</option>
+                            <option value="Maru">Maru</option>
+                            <option value="Marty">Marty</option>
+                            <option value="Společný">Společný</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label for="filter-debt-type">Filtr dle typu:</label>
+                        <select id="filter-debt-type">
+                            <option value="">Vše</option>
+                            <option value="rent">Nájem</option>
+                            <option value="other">Ostatní</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label for="filter-debt-currency">Filtr dle měny:</label>
+                        <select id="filter-debt-currency">
+                            <option value="">Všechny</option>
+                            <option value="CZK">CZK</option>
+                            <option value="EUR">EUR</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label for="filter-debt-month">Filtr dle měsíce:</label>
+                        <input type="month" id="filter-debt-month">
+                    </div>
+                    <div class="form-group">
+                        <button id="clear-debt-filters" class="btn">Zrušit filtry</button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Tabulka dluhů -->
+            <div class="table-container">
+                <table id="debt-table">
+                    <thead>
+                        <tr>
+                            <th>Datum</th>
+                            <th>Osoba</th>
+                            <th>Typ dluhu</th>
+                            <th>Přidáno</th>
+                            <th>Měna</th>
+                            <th>Splaceno</th>
+                            <th>Měna</th>
+                            <th>Zůstatek</th>
+                            <th>Poznámka</th>
+                            <th>Akce</th>
+                        </tr>
+                    </thead>
+                    <tbody id="debt-table-body">
+                        <!-- Zde budou dynamicky generované řádky -->
+                    </tbody>
+                </table>
+                <div id="no-debt-message" class="hidden">
+                    <p>Zatím nebyly zaznamenány žádné dluhy.</p>
                 </div>
             </div>
         </section>
@@ -331,16 +717,36 @@
                             <span id="maru-total-hours" class="value">0 hodin</span>
                         </div>
                         <div class="summary-item">
-                            <span class="label">Celkový výdělek:</span>
-                            <span id="maru-total-earnings" class="value">0 Kč</span>
+                            <span class="label">Celkový výdělek (CZK):</span>
+                            <span id="maru-total-earnings-czk" class="value">0 Kč</span>
                         </div>
                         <div class="summary-item">
-                            <span class="label">Splátky dluhu:</span>
-                            <span id="maru-debt-paid" class="value">0 Kč</span>
+                            <span class="label">Celkový výdělek (EUR):</span>
+                            <span id="maru-total-earnings-eur" class="value">0 €</span>
                         </div>
                         <div class="summary-item">
-                            <span class="label">Vyplaceno:</span>
-                            <span id="maru-paid-out" class="value">0 Kč</span>
+                            <span class="label">Splátky nájmu (CZK):</span>
+                            <span id="maru-rent-paid-czk" class="value">0 Kč</span>
+                        </div>
+                        <div class="summary-item">
+                            <span class="label">Splátky ost. dluhu (CZK):</span>
+                            <span id="maru-other-debt-paid-czk" class="value">0 Kč</span>
+                        </div>
+                        <div class="summary-item">
+                            <span class="label">Splátky nájmu (EUR):</span>
+                            <span id="maru-rent-paid-eur" class="value">0 €</span>
+                        </div>
+                        <div class="summary-item">
+                            <span class="label">Splátky ost. dluhu (EUR):</span>
+                            <span id="maru-other-debt-paid-eur" class="value">0 €</span>
+                        </div>
+                        <div class="summary-item">
+                            <span class="label">Vyplaceno (CZK):</span>
+                            <span id="maru-paid-out-czk" class="value">0 Kč</span>
+                        </div>
+                        <div class="summary-item">
+                            <span class="label">Vyplaceno (EUR):</span>
+                            <span id="maru-paid-out-eur" class="value">0 €</span>
                         </div>
                     </div>
                 </div>
@@ -353,16 +759,36 @@
                             <span id="marty-total-hours" class="value">0 hodin</span>
                         </div>
                         <div class="summary-item">
-                            <span class="label">Celkový výdělek:</span>
-                            <span id="marty-total-earnings" class="value">0 Kč</span>
+                            <span class="label">Celkový výdělek (CZK):</span>
+                            <span id="marty-total-earnings-czk" class="value">0 Kč</span>
                         </div>
                         <div class="summary-item">
-                            <span class="label">Splátky dluhu:</span>
-                            <span id="marty-debt-paid" class="value">0 Kč</span>
+                            <span class="label">Celkový výdělek (EUR):</span>
+                            <span id="marty-total-earnings-eur" class="value">0 €</span>
                         </div>
                         <div class="summary-item">
-                            <span class="label">Vyplaceno:</span>
-                            <span id="marty-paid-out" class="value">0 Kč</span>
+                            <span class="label">Splátky nájmu (CZK):</span>
+                            <span id="marty-rent-paid-czk" class="value">0 Kč</span>
+                        </div>
+                        <div class="summary-item">
+                            <span class="label">Splátky ost. dluhu (CZK):</span>
+                            <span id="marty-other-debt-paid-czk" class="value">0 Kč</span>
+                        </div>
+                        <div class="summary-item">
+                            <span class="label">Splátky nájmu (EUR):</span>
+                            <span id="marty-rent-paid-eur" class="value">0 €</span>
+                        </div>
+                        <div class="summary-item">
+                            <span class="label">Splátky ost. dluhu (EUR):</span>
+                            <span id="marty-other-debt-paid-eur" class="value">0 €</span>
+                        </div>
+                        <div class="summary-item">
+                            <span class="label">Vyplaceno (CZK):</span>
+                            <span id="marty-paid-out-czk" class="value">0 Kč</span>
+                        </div>
+                        <div class="summary-item">
+                            <span class="label">Vyplaceno (EUR):</span>
+                            <span id="marty-paid-out-eur" class="value">0 €</span>
                         </div>
                     </div>
                 </div>
@@ -375,20 +801,36 @@
                             <span id="total-hours" class="value">0 hodin</span>
                         </div>
                         <div class="summary-item">
-                            <span class="label">Celkový výdělek:</span>
-                            <span id="total-earnings" class="value">0 Kč</span>
+                            <span class="label">Celkový výdělek (CZK):</span>
+                            <span id="total-earnings-czk" class="value">0 Kč</span>
                         </div>
                         <div class="summary-item">
-                            <span class="label">Celkem příjmy:</span>
-                            <span id="total-income" class="value">0 Kč</span>
+                            <span class="label">Celkový výdělek (EUR):</span>
+                            <span id="total-earnings-eur" class="value">0 €</span>
                         </div>
                         <div class="summary-item">
-                            <span class="label">Celkem výdaje:</span>
-                            <span id="total-expenses" class="value">0 Kč</span>
+                            <span class="label">Celkem příjmy (CZK):</span>
+                            <span id="total-income-czk" class="value">0 Kč</span>
+                        </div>
+                        <div class="summary-item">
+                            <span class="label">Celkem příjmy (EUR):</span>
+                            <span id="total-income-eur" class="value">0 €</span>
+                        </div>
+                        <div class="summary-item">
+                            <span class="label">Celkem výdaje (CZK):</span>
+                            <span id="total-expenses-czk" class="value">0 Kč</span>
+                        </div>
+                        <div class="summary-item">
+                            <span class="label">Celkem výdaje (EUR):</span>
+                            <span id="total-expenses-eur" class="value">0 €</span>
                         </div>
                         <div class="summary-item highlight">
-                            <span class="label">Celkem vyplaceno:</span>
-                            <span id="total-paid-out" class="value">0 Kč</span>
+                            <span class="label">Celkový aktuální dluh (CZK):</span>
+                            <span id="total-current-debt-czk" class="value">0 Kč</span>
+                        </div>
+                        <div class="summary-item highlight">
+                            <span class="label">Celkový aktuální dluh (EUR):</span>
+                            <span id="total-current-debt-eur" class="value">0 €</span>
                         </div>
                     </div>
                 </div>
@@ -397,7 +839,7 @@
     </main>
 
     <footer>
-        <p>Pracovní výkazy & Finance © 2025 | Verze 1.0</p>
+        <p>Pracovní výkazy & Finance © 2025 | Verze 2.0</p>
         <button id="install-app" class="hidden">Nainstalovat aplikaci</button>
     </footer>
 
