@@ -1,0 +1,418 @@
+<!DOCTYPE html>
+<html lang="cs">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="theme-color" content="#4a6da7">
+    <title>Pracovní výkazy & Finance</title>
+    <link rel="stylesheet" href="styles.css">
+    <link rel="manifest" href="manifest.json">
+    <link rel="apple-touch-icon" href="icons/icon-192x192.png">
+    <link rel="icon" href="icons/favicon.ico" type="image/x-icon">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+</head>
+<body>
+    <header>
+        <h1>Pracovní výkazy & Finance</h1>
+        <nav>
+            <button id="nav-reports" class="active">Výkazy</button>
+            <button id="nav-finances">Finance</button>
+            <button id="nav-summary">Souhrn</button>
+        </nav>
+    </header>
+
+    <main>
+        <!-- Sekce pracovních výkazů -->
+        <section id="reports-section" class="section active">
+            <div class="section-header">
+                <h2>Pracovní výkazy</h2>
+                <div class="action-buttons">
+                    <button id="toggle-timer-mode" class="btn primary-btn">
+                        <i class="fas fa-stopwatch"></i> Stopky
+                    </button>
+                    <button id="toggle-manual-mode" class="btn">
+                        <i class="fas fa-pen"></i> Ruční zadání
+                    </button>
+                </div>
+            </div>
+
+            <!-- Timer Mode -->
+            <div id="timer-mode" class="input-form">
+                <div class="form-row">
+                    <div class="form-group">
+                        <label for="timer-person">Osoba:</label>
+                        <select id="timer-person" required>
+                            <option value="Maru">Maru (275 Kč/hod)</option>
+                            <option value="Marty">Marty (400 Kč/hod)</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label for="timer-category">Kategorie:</label>
+                        <select id="timer-category" required>
+                            <option value="Komunikace s hostem">Komunikace s hostem</option>
+                            <option value="Úklid">Úklid</option>
+                            <option value="Wellness">Wellness</option>
+                            <option value="custom">+ Vlastní kategorie</option>
+                        </select>
+                        <input type="text" id="timer-custom-category" placeholder="Vlastní kategorie" class="hidden">
+                    </div>
+                </div>
+                
+                <div id="timer-display">
+                    <div id="timer">00:00:00</div>
+                    <button id="start-timer" class="btn primary-btn">Spustit</button>
+                    <button id="pause-timer" class="btn" disabled>Pauza</button>
+                    <button id="stop-timer" class="btn danger-btn" disabled>Zastavit</button>
+                </div>
+                
+                <div id="timer-summary" class="hidden">
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label for="timer-start">Začátek:</label>
+                            <input type="time" id="timer-start" disabled>
+                        </div>
+                        <div class="form-group">
+                            <label for="timer-end">Konec:</label>
+                            <input type="time" id="timer-end" disabled>
+                        </div>
+                        <div class="form-group">
+                            <label for="timer-pause">Pauza (min):</label>
+                            <input type="number" id="timer-pause" min="0" value="0">
+                        </div>
+                    </div>
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label for="timer-hours">Odpracováno (hod):</label>
+                            <input type="text" id="timer-hours" disabled>
+                        </div>
+                        <div class="form-group">
+                            <label for="timer-earnings">Výdělek (Kč):</label>
+                            <input type="text" id="timer-earnings" disabled>
+                        </div>
+                    </div>
+                    <button id="save-timer" class="btn primary-btn">Uložit záznam</button>
+                </div>
+            </div>
+
+            <!-- Manual Mode -->
+            <div id="manual-mode" class="input-form hidden">
+                <div class="form-row">
+                    <div class="form-group">
+                        <label for="manual-date">Datum:</label>
+                        <input type="date" id="manual-date" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="manual-person">Osoba:</label>
+                        <select id="manual-person" required>
+                            <option value="Maru">Maru (275 Kč/hod)</option>
+                            <option value="Marty">Marty (400 Kč/hod)</option>
+                        </select>
+                    </div>
+                </div>
+                <div class="form-row">
+                    <div class="form-group">
+                        <label for="manual-category">Kategorie:</label>
+                        <select id="manual-category" required>
+                            <option value="Komunikace s hostem">Komunikace s hostem</option>
+                            <option value="Úklid">Úklid</option>
+                            <option value="Wellness">Wellness</option>
+                            <option value="custom">+ Vlastní kategorie</option>
+                        </select>
+                        <input type="text" id="manual-custom-category" placeholder="Vlastní kategorie" class="hidden">
+                    </div>
+                </div>
+                <div class="form-row">
+                    <div class="form-group">
+                        <label for="manual-start">Začátek:</label>
+                        <input type="time" id="manual-start" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="manual-end">Konec:</label>
+                        <input type="time" id="manual-end" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="manual-pause">Pauza (min):</label>
+                        <input type="number" id="manual-pause" min="0" value="0">
+                    </div>
+                </div>
+                <div class="form-row">
+                    <div class="form-group">
+                        <label for="manual-hours">Odpracováno (hod):</label>
+                        <input type="text" id="manual-hours" placeholder="Např. 2:30, 2.5, 150">
+                    </div>
+                    <div class="form-group">
+                        <label for="manual-earnings">Výdělek (Kč):</label>
+                        <input type="text" id="manual-earnings" disabled>
+                    </div>
+                </div>
+                <button id="save-manual" class="btn primary-btn">Uložit záznam</button>
+            </div>
+
+            <!-- Filtry pro výkazy -->
+            <div class="filters">
+                <div class="form-row">
+                    <div class="form-group">
+                        <label for="filter-date">Filtr dle data:</label>
+                        <input type="date" id="filter-date">
+                    </div>
+                    <div class="form-group">
+                        <label for="filter-person">Filtr dle osoby:</label>
+                        <select id="filter-person">
+                            <option value="">Všichni</option>
+                            <option value="Maru">Maru</option>
+                            <option value="Marty">Marty</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <button id="clear-filters" class="btn">Zrušit filtry</button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Tabulka výkazů -->
+            <div class="table-container">
+                <table id="reports-table">
+                    <thead>
+                        <tr>
+                            <th>Datum</th>
+                            <th>Osoba</th>
+                            <th>Kategorie</th>
+                            <th>Začátek</th>
+                            <th>Konec</th>
+                            <th>Pauza (min)</th>
+                            <th>Odprac. (hod)</th>
+                            <th>Výdělek (Kč)</th>
+                            <th>Akce</th>
+                        </tr>
+                    </thead>
+                    <tbody id="reports-table-body">
+                        <!-- Zde budou dynamicky generované řádky -->
+                    </tbody>
+                </table>
+                <div id="no-reports-message" class="hidden">
+                    <p>Zatím nebyly zaznamenány žádné výkazy.</p>
+                </div>
+            </div>
+        </section>
+
+        <!-- Sekce financí -->
+        <section id="finances-section" class="section">
+            <div class="section-header">
+                <h2>Finance</h2>
+                <button id="add-finance" class="btn primary-btn">
+                    <i class="fas fa-plus"></i> Přidat záznam
+                </button>
+            </div>
+
+            <!-- Formulář pro přidání finančního záznamu -->
+            <div id="finance-form" class="input-form hidden">
+                <div class="form-row">
+                    <div class="form-group">
+                        <label for="finance-date">Datum:</label>
+                        <input type="date" id="finance-date" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="finance-type">Typ:</label>
+                        <select id="finance-type" required>
+                            <option value="income">Příjem</option>
+                            <option value="expense">Výdaj</option>
+                        </select>
+                    </div>
+                </div>
+                <div class="form-row">
+                    <div class="form-group">
+                        <label for="finance-amount">Částka (Kč):</label>
+                        <input type="number" id="finance-amount" min="0" step="0.01" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="finance-person">Osoba:</label>
+                        <select id="finance-person">
+                            <option value="">-</option>
+                            <option value="Maru">Maru</option>
+                            <option value="Marty">Marty</option>
+                        </select>
+                    </div>
+                </div>
+                <div class="form-row">
+                    <div class="form-group wide">
+                        <label for="finance-note">Poznámka:</label>
+                        <input type="text" id="finance-note">
+                    </div>
+                </div>
+                <div class="form-row" id="finance-debt-payment" style="display: none;">
+                    <div class="form-group">
+                        <label for="finance-debt-ratio">Splátka dluhu (%):</label>
+                        <input type="number" id="finance-debt-ratio" min="0" max="100" value="0">
+                    </div>
+                    <div class="form-group">
+                        <label for="finance-debt-amount">Částka splátky (Kč):</label>
+                        <input type="number" id="finance-debt-amount" disabled>
+                    </div>
+                    <div class="form-group">
+                        <label for="finance-payout">Vyplaceno (Kč):</label>
+                        <input type="number" id="finance-payout" disabled>
+                    </div>
+                </div>
+                <button id="save-finance" class="btn primary-btn">Uložit záznam</button>
+                <button id="cancel-finance" class="btn">Zrušit</button>
+            </div>
+
+            <!-- Filtry pro finance -->
+            <div class="filters">
+                <div class="form-row">
+                    <div class="form-group">
+                        <label for="filter-finance-date">Filtr dle data:</label>
+                        <input type="date" id="filter-finance-date">
+                    </div>
+                    <div class="form-group">
+                        <label for="filter-finance-type">Filtr dle typu:</label>
+                        <select id="filter-finance-type">
+                            <option value="">Vše</option>
+                            <option value="income">Příjem</option>
+                            <option value="expense">Výdaj</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label for="filter-finance-person">Filtr dle osoby:</label>
+                        <select id="filter-finance-person">
+                            <option value="">Všichni</option>
+                            <option value="Maru">Maru</option>
+                            <option value="Marty">Marty</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <button id="clear-finance-filters" class="btn">Zrušit filtry</button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Tabulka financí -->
+            <div class="table-container">
+                <table id="finances-table">
+                    <thead>
+                        <tr>
+                            <th>Datum</th>
+                            <th>Typ</th>
+                            <th>Osoba</th>
+                            <th>Částka (Kč)</th>
+                            <th>Splátka dluhu (Kč)</th>
+                            <th>Vyplaceno (Kč)</th>
+                            <th>Poznámka</th>
+                            <th>Akce</th>
+                        </tr>
+                    </thead>
+                    <tbody id="finances-table-body">
+                        <!-- Zde budou dynamicky generované řádky -->
+                    </tbody>
+                </table>
+                <div id="no-finances-message" class="hidden">
+                    <p>Zatím nebyly zaznamenány žádné finanční transakce.</p>
+                </div>
+            </div>
+        </section>
+
+        <!-- Sekce souhrnu -->
+        <section id="summary-section" class="section">
+            <div class="section-header">
+                <h2>Souhrn</h2>
+                <div class="action-buttons">
+                    <button id="export-data" class="btn primary-btn">
+                        <i class="fas fa-file-export"></i> Export do CSV
+                    </button>
+                </div>
+            </div>
+
+            <div class="summary-cards">
+                <div class="summary-card">
+                    <h3>Maru</h3>
+                    <div class="summary-data">
+                        <div class="summary-item">
+                            <span class="label">Celkem odpracováno:</span>
+                            <span id="maru-total-hours" class="value">0 hodin</span>
+                        </div>
+                        <div class="summary-item">
+                            <span class="label">Celkový výdělek:</span>
+                            <span id="maru-total-earnings" class="value">0 Kč</span>
+                        </div>
+                        <div class="summary-item">
+                            <span class="label">Splátky dluhu:</span>
+                            <span id="maru-debt-paid" class="value">0 Kč</span>
+                        </div>
+                        <div class="summary-item">
+                            <span class="label">Vyplaceno:</span>
+                            <span id="maru-paid-out" class="value">0 Kč</span>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="summary-card">
+                    <h3>Marty</h3>
+                    <div class="summary-data">
+                        <div class="summary-item">
+                            <span class="label">Celkem odpracováno:</span>
+                            <span id="marty-total-hours" class="value">0 hodin</span>
+                        </div>
+                        <div class="summary-item">
+                            <span class="label">Celkový výdělek:</span>
+                            <span id="marty-total-earnings" class="value">0 Kč</span>
+                        </div>
+                        <div class="summary-item">
+                            <span class="label">Splátky dluhu:</span>
+                            <span id="marty-debt-paid" class="value">0 Kč</span>
+                        </div>
+                        <div class="summary-item">
+                            <span class="label">Vyplaceno:</span>
+                            <span id="marty-paid-out" class="value">0 Kč</span>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="summary-card">
+                    <h3>Celkový souhrn</h3>
+                    <div class="summary-data">
+                        <div class="summary-item">
+                            <span class="label">Celkem odpracováno:</span>
+                            <span id="total-hours" class="value">0 hodin</span>
+                        </div>
+                        <div class="summary-item">
+                            <span class="label">Celkový výdělek:</span>
+                            <span id="total-earnings" class="value">0 Kč</span>
+                        </div>
+                        <div class="summary-item">
+                            <span class="label">Celkem příjmy:</span>
+                            <span id="total-income" class="value">0 Kč</span>
+                        </div>
+                        <div class="summary-item">
+                            <span class="label">Celkem výdaje:</span>
+                            <span id="total-expenses" class="value">0 Kč</span>
+                        </div>
+                        <div class="summary-item highlight">
+                            <span class="label">Celkem vyplaceno:</span>
+                            <span id="total-paid-out" class="value">0 Kč</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+    </main>
+
+    <footer>
+        <p>Pracovní výkazy & Finance © 2025 | Verze 1.0</p>
+        <button id="install-app" class="hidden">Nainstalovat aplikaci</button>
+    </footer>
+
+    <div id="notification" class="notification hidden"></div>
+
+    <script src="app.js"></script>
+    <script>
+        // Registrace service workeru
+        if ('serviceWorker' in navigator) {
+            window.addEventListener('load', () => {
+                navigator.serviceWorker.register('/service-worker.js')
+                    .then(reg => console.log('Service Worker registrován!', reg))
+                    .catch(err => console.log('Service Worker registrace selhala:', err));
+            });
+        }
+    </script>
+</body>
+</html>

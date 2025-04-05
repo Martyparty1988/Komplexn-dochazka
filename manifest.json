@@ -1,0 +1,39 @@
+{
+  "name": "Pracovní výkazy & Finance",
+  "short_name": "Výkazy & Finance",
+  "description": "Aplikace pro správu pracovních výkazů a financí",
+  "start_url": "/index.html",
+  "display": "standalone",
+  "background_color": "#f5f5f7",
+  "theme_color": "#4a6da7",
+  "orientation": "any",
+  "icons": [
+    {
+      "src": "icons/icon-192x192.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "any maskable"
+    },
+    {
+      "src": "icons/icon-512x512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any maskable"
+    }
+  ],
+  "shortcuts": [
+    {
+      "name": "Přidat výkaz",
+      "url": "/index.html",
+      "description": "Rychlý přístup k pracovním výkazům"
+    },
+    {
+      "name": "Finance",
+      "url": "/index.html?section=finances",
+      "description": "Správa financí"
+    }
+  ],
+  "categories": ["productivity", "finance", "utilities"],
+  "iarc_rating_id": "",
+  "screenshots": []
+}
