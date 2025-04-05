@@ -108,17 +108,19 @@ function calculateDebtPayment(amount, person) {
 
 function showNotification(message, type = 'success') {
     const notification = document.getElementById('notification');
-    notification.textContent = message;
-    notification.classList.remove('success', 'error', 'warning');
-    notification.classList.add(type, 'show');
-    
-    setTimeout(() => {
-        notification.classList.remove('show');
-    }, 3000);
+    if (notification) {
+        notification.textContent = message;
+        notification.classList.remove('success', 'error', 'warning');
+        notification.classList.add(type, 'show');
+        
+        setTimeout(() => {
+            notification.classList.remove('show');
+        }, 3000);
+    }
 }
 
 function validateWorkReport(data) {
-    const { date, person, category, startTime, endTime, pauseMinutes, hours, earnings } = data;
+    const { date, person, category, hours, earnings } = data;
     
     if (!date) {
         showNotification('Prosím vyplňte datum.', 'error');
@@ -166,18 +168,27 @@ function validateFinanceRecord(data) {
 
 // Funkce pro správu lokálního úložiště
 function saveData() {
-    localStorage.setItem('workReportData', JSON.stringify(appData));
+    try {
+        localStorage.setItem('workReportData', JSON.stringify(appData));
+    } catch (e) {
+        console.error('Chyba při ukládání dat:', e);
+        showNotification('Chyba při ukládání dat', 'error');
+    }
 }
 
 function loadData() {
-    const savedData = localStorage.getItem('workReportData');
-    if (savedData) {
-        appData = JSON.parse(savedData);
-        
-        // Zajistí, že pole kategorií existuje
-        if (!appData.categories) {
-            appData.categories = ['Komunikace s hostem', 'Úklid', 'Wellness'];
+    try {
+        const savedData = localStorage.getItem('workReportData');
+        if (savedData) {
+            appData = JSON.parse(savedData);
+            
+            // Zajistí, že pole kategorií existuje
+            if (!appData.categories) {
+                appData.categories = ['Komunikace s hostem', 'Úklid', 'Wellness'];
+            }
         }
+    } catch (e) {
+        console.error('Chyba při načítání dat:', e);
     }
 }
 
@@ -222,15 +233,20 @@ function startTimer() {
     if (timerRunning) return;
     
     timerRunning = true;
-    document.getElementById('start-timer').disabled = true;
-    document.getElementById('pause-timer').disabled = false;
-    document.getElementById('stop-timer').disabled = false;
+    const startButton = document.getElementById('start-timer');
+    const pauseButton = document.getElementById('pause-timer');
+    const stopButton = document.getElementById('stop-timer');
+    
+    if (startButton) startButton.disabled = true;
+    if (pauseButton) pauseButton.disabled = false;
+    if (stopButton) stopButton.disabled = false;
     
     timerStartTime = Date.now() - timerElapsedTime;
     
     timerInterval = setInterval(() => {
         const currentTime = Math.floor((Date.now() - timerStartTime) / 1000);
-        document.getElementById('timer').textContent = formatTime(currentTime);
+        const timerDisplay = document.getElementById('timer');
+        if (timerDisplay) timerDisplay.textContent = formatTime(currentTime);
     }, 1000);
 }
 
@@ -242,9 +258,13 @@ function pauseTimer() {
     
     timerElapsedTime = Date.now() - timerStartTime;
     
-    document.getElementById('start-timer').disabled = false;
-    document.getElementById('pause-timer').disabled = true;
-    document.getElementById('stop-timer').disabled = false;
+    const startButton = document.getElementById('start-timer');
+    const pauseButton = document.getElementById('pause-timer');
+    const stopButton = document.getElementById('stop-timer');
+    
+    if (startButton) startButton.disabled = false;
+    if (pauseButton) pauseButton.disabled = true;
+    if (stopButton) stopButton.disabled = false;
 }
 
 function stopTimer() {
@@ -255,17 +275,25 @@ function stopTimer() {
     const startTime = new Date(timerStartTime);
     const endTime = new Date(timerStartTime + timerElapsedTime);
     
-    document.getElementById('timer-start').value = 
-        `${String(startTime.getHours()).padStart(2, '0')}:${String(startTime.getMinutes()).padStart(2, '0')}`;
+    const timerStartInput = document.getElementById('timer-start');
+    const timerEndInput = document.getElementById('timer-end');
     
-    document.getElementById('timer-end').value = 
-        `${String(endTime.getHours()).padStart(2, '0')}:${String(endTime.getMinutes()).padStart(2, '0')}`;
+    if (timerStartInput) {
+        timerStartInput.value = 
+            `${String(startTime.getHours()).padStart(2, '0')}:${String(startTime.getMinutes()).padStart(2, '0')}`;
+    }
+    
+    if (timerEndInput) {
+        timerEndInput.value = 
+            `${String(endTime.getHours()).padStart(2, '0')}:${String(endTime.getMinutes()).padStart(2, '0')}`;
+    }
     
     // Výpočet a zobrazení shrnutí
     updateTimerSummary();
     
     // Zobrazení shrnutí
-    document.getElementById('timer-summary').classList.remove('hidden');
+    const timerSummary = document.getElementById('timer-summary');
+    if (timerSummary) timerSummary.classList.remove('hidden');
     
     // Reset timeru
     resetTimer();
@@ -275,33 +303,53 @@ function resetTimer() {
     clearInterval(timerInterval);
     timerRunning = false;
     timerElapsedTime = 0;
-    document.getElementById('timer').textContent = '00:00:00';
-    document.getElementById('start-timer').disabled = false;
-    document.getElementById('pause-timer').disabled = true;
-    document.getElementById('stop-timer').disabled = true;
+    
+    const timerDisplay = document.getElementById('timer');
+    const startButton = document.getElementById('start-timer');
+    const pauseButton = document.getElementById('pause-timer');
+    const stopButton = document.getElementById('stop-timer');
+    
+    if (timerDisplay) timerDisplay.textContent = '00:00:00';
+    if (startButton) startButton.disabled = false;
+    if (pauseButton) pauseButton.disabled = true;
+    if (stopButton) stopButton.disabled = true;
 }
 
 function updateTimerSummary() {
-    const startTime = document.getElementById('timer-start').value;
-    const endTime = document.getElementById('timer-end').value;
-    const pauseMinutes = parseInt(document.getElementById('timer-pause').value) || 0;
-    const person = document.getElementById('timer-person').value;
+    const startTimeInput = document.getElementById('timer-start');
+    const endTimeInput = document.getElementById('timer-end');
+    const pauseInput = document.getElementById('timer-pause');
+    const personSelect = document.getElementById('timer-person');
+    
+    if (!startTimeInput || !endTimeInput || !pauseInput || !personSelect) return;
+    
+    const startTime = startTimeInput.value;
+    const endTime = endTimeInput.value;
+    const pauseMinutes = parseInt(pauseInput.value) || 0;
+    const person = personSelect.value;
     
     const hours = calculateHours(startTime, endTime, pauseMinutes);
     const earnings = calculateEarnings(hours, person);
     
-    document.getElementById('timer-hours').value = hours.toFixed(2);
-    document.getElementById('timer-earnings').value = formatCurrency(earnings);
+    const hoursInput = document.getElementById('timer-hours');
+    const earningsInput = document.getElementById('timer-earnings');
+    
+    if (hoursInput) hoursInput.value = hours.toFixed(2);
+    if (earningsInput) earningsInput.value = formatCurrency(earnings);
 }
 
 // Funkce pro vykreslení UI
 function renderReportsTable() {
     const tableBody = document.getElementById('reports-table-body');
     const noReportsMessage = document.getElementById('no-reports-message');
+    const dateFilterInput = document.getElementById('filter-date');
+    const personFilterSelect = document.getElementById('filter-person');
+    
+    if (!tableBody || !noReportsMessage || !dateFilterInput || !personFilterSelect) return;
     
     // Získání filtrů
-    const dateFilter = document.getElementById('filter-date').value;
-    const personFilter = document.getElementById('filter-person').value;
+    const dateFilter = dateFilterInput.value;
+    const personFilter = personFilterSelect.value;
     
     // Aplikace filtrů
     let filteredReports = appData.reports;
@@ -365,10 +413,12 @@ function renderFinancesTable() {
     const tableBody = document.getElementById('finances-table-body');
     const noFinancesMessage = document.getElementById('no-finances-message');
     
+    if (!tableBody || !noFinancesMessage) return;
+    
     // Získání filtrů
-    const dateFilter = document.getElementById('filter-finance-date').value;
-    const typeFilter = document.getElementById('filter-finance-type').value;
-    const personFilter = document.getElementById('filter-finance-person').value;
+    const dateFilter = document.getElementById('filter-finance-date')?.value;
+    const typeFilter = document.getElementById('filter-finance-type')?.value;
+    const personFilter = document.getElementById('filter-finance-person')?.value;
     
     // Aplikace filtrů
     let filteredFinances = appData.finances;
@@ -485,21 +535,37 @@ function updateSummary() {
     const totalPaidOut = maruPaidOut + martyPaidOut;
     
     // Aktualizace UI
-    document.getElementById('maru-total-hours').textContent = `${maruTotalHours.toFixed(2)} hodin`;
-    document.getElementById('maru-total-earnings').textContent = formatCurrency(maruTotalEarnings);
-    document.getElementById('maru-debt-paid').textContent = formatCurrency(maruDebtPaid);
-    document.getElementById('maru-paid-out').textContent = formatCurrency(maruPaidOut);
+    const elements = {
+        maruTotalHours: document.getElementById('maru-total-hours'),
+        maruTotalEarnings: document.getElementById('maru-total-earnings'),
+        maruDebtPaid: document.getElementById('maru-debt-paid'),
+        maruPaidOut: document.getElementById('maru-paid-out'),
+        martyTotalHours: document.getElementById('marty-total-hours'),
+        martyTotalEarnings: document.getElementById('marty-total-earnings'),
+        martyDebtPaid: document.getElementById('marty-debt-paid'),
+        martyPaidOut: document.getElementById('marty-paid-out'),
+        totalHours: document.getElementById('total-hours'),
+        totalEarnings: document.getElementById('total-earnings'),
+        totalIncome: document.getElementById('total-income'),
+        totalExpenses: document.getElementById('total-expenses'),
+        totalPaidOut: document.getElementById('total-paid-out')
+    };
+
+    if (elements.maruTotalHours) elements.maruTotalHours.textContent = `${maruTotalHours.toFixed(2)} hodin`;
+    if (elements.maruTotalEarnings) elements.maruTotalEarnings.textContent = formatCurrency(maruTotalEarnings);
+    if (elements.maruDebtPaid) elements.maruDebtPaid.textContent = formatCurrency(maruDebtPaid);
+    if (elements.maruPaidOut) elements.maruPaidOut.textContent = formatCurrency(maruPaidOut);
     
-    document.getElementById('marty-total-hours').textContent = `${martyTotalHours.toFixed(2)} hodin`;
-    document.getElementById('marty-total-earnings').textContent = formatCurrency(martyTotalEarnings);
-    document.getElementById('marty-debt-paid').textContent = formatCurrency(martyDebtPaid);
-    document.getElementById('marty-paid-out').textContent = formatCurrency(martyPaidOut);
+    if (elements.martyTotalHours) elements.martyTotalHours.textContent = `${martyTotalHours.toFixed(2)} hodin`;
+    if (elements.martyTotalEarnings) elements.martyTotalEarnings.textContent = formatCurrency(martyTotalEarnings);
+    if (elements.martyDebtPaid) elements.martyDebtPaid.textContent = formatCurrency(martyDebtPaid);
+    if (elements.martyPaidOut) elements.martyPaidOut.textContent = formatCurrency(martyPaidOut);
     
-    document.getElementById('total-hours').textContent = `${totalHours.toFixed(2)} hodin`;
-    document.getElementById('total-earnings').textContent = formatCurrency(totalEarnings);
-    document.getElementById('total-income').textContent = formatCurrency(totalIncome);
-    document.getElementById('total-expenses').textContent = `-${formatCurrency(totalExpenses)}`;
-    document.getElementById('total-paid-out').textContent = formatCurrency(totalPaidOut);
+    if (elements.totalHours) elements.totalHours.textContent = `${totalHours.toFixed(2)} hodin`;
+    if (elements.totalEarnings) elements.totalEarnings.textContent = formatCurrency(totalEarnings);
+    if (elements.totalIncome) elements.totalIncome.textContent = formatCurrency(totalIncome);
+    if (elements.totalExpenses) elements.totalExpenses.textContent = `-${formatCurrency(totalExpenses)}`;
+    if (elements.totalPaidOut) elements.totalPaidOut.textContent = formatCurrency(totalPaidOut);
 }
 
 function updateCategoryDropdowns() {
@@ -522,7 +588,7 @@ function updateCategoryDropdowns() {
         });
         
         // Přidat zpět vlastní kategorii
-        dropdown.appendChild(customOption);
+        if (customOption) dropdown.appendChild(customOption);
         
         // Obnovit původní hodnotu
         if (appData.categories.includes(currentValue) || currentValue === 'custom') {
@@ -611,31 +677,42 @@ function deleteFinance(id) {
 function initForms() {
     // Nastavit dnešní datum pro všechny datumové vstupy
     const today = new Date().toISOString().split('T')[0];
-    document.getElementById('manual-date').value = today;
-    document.getElementById('finance-date').value = today;
+    const manualDate = document.getElementById('manual-date');
+    const financeDate = document.getElementById('finance-date');
+    
+    if (manualDate) manualDate.value = today;
+    if (financeDate) financeDate.value = today;
     
     // Přidání nových kategorií
-    document.getElementById('timer-category').addEventListener('change', function() {
-        const customCategoryInput = document.getElementById('timer-custom-category');
-        
-        if (this.value === 'custom') {
-            customCategoryInput.classList.remove('hidden');
-            customCategoryInput.focus();
-        } else {
-            customCategoryInput.classList.add('hidden');
-        }
-    });
+    const timerCategory = document.getElementById('timer-category');
+    if (timerCategory) {
+        timerCategory.addEventListener('change', function() {
+            const customCategoryInput = document.getElementById('timer-custom-category');
+            if (customCategoryInput) {
+                if (this.value === 'custom') {
+                    customCategoryInput.classList.remove('hidden');
+                    customCategoryInput.focus();
+                } else {
+                    customCategoryInput.classList.add('hidden');
+                }
+            }
+        });
+    }
     
-    document.getElementById('manual-category').addEventListener('change', function() {
-        const customCategoryInput = document.getElementById('manual-custom-category');
-        
-        if (this.value === 'custom') {
-            customCategoryInput.classList.remove('hidden');
-            customCategoryInput.focus();
-        } else {
-            customCategoryInput.classList.add('hidden');
-        }
-    });
+    const manualCategory = document.getElementById('manual-category');
+    if (manualCategory) {
+        manualCategory.addEventListener('change', function() {
+            const customCategoryInput = document.getElementById('manual-custom-category');
+            if (customCategoryInput) {
+                if (this.value === 'custom') {
+                    customCategoryInput.classList.remove('hidden#pragma once');
+                    customCategoryInput.focus();
+                } else {
+                    customCategoryInput.classList.add('hidden');
+                }
+            }
+        });
+    }
     
     // Výpočet hodin a výdělku pro manuální režim
     const manualStartInput = document.getElementById('manual-start');
@@ -645,6 +722,8 @@ function initForms() {
     const manualPersonSelect = document.getElementById('manual-person');
     
     function updateManualEarnings() {
+        if (!manualHoursInput || !manualPersonSelect) return;
+        
         let hours = 0;
         
         // Pokud je vyplněn počet hodin ručně, použijeme to
@@ -652,8 +731,8 @@ function initForms() {
             hours = parseHoursInput(manualHoursInput.value);
         } 
         // Jinak vypočítáme z času začátku, konce a pauzy
-        else if (manualStartInput.value && manualEndInput.value) {
-            const pauseMinutes = parseInt(manualPauseInput.value) || 0;
+        else if (manualStartInput?.value && manualEndInput?.value) {
+            const pauseMinutes = parseInt(manualPauseInput?.value) || 0;
             hours = calculateHours(manualStartInput.value, manualEndInput.value, pauseMinutes);
             manualHoursInput.value = hours.toFixed(2);
         }
@@ -661,44 +740,60 @@ function initForms() {
         const person = manualPersonSelect.value;
         const earnings = calculateEarnings(hours, person);
         
-        document.getElementById('manual-earnings').value = formatCurrency(earnings);
+        const earningsInput = document.getElementById('manual-earnings');
+        if (earningsInput) earningsInput.value = formatCurrency(earnings);
     }
     
-    manualStartInput.addEventListener('change', updateManualEarnings);
-    manualEndInput.addEventListener('change', updateManualEarnings);
-    manualPauseInput.addEventListener('input', updateManualEarnings);
-    manualHoursInput.addEventListener('input', updateManualEarnings);
-    manualPersonSelect.addEventListener('change', updateManualEarnings);
+    if (manualStartInput) manualStartInput.addEventListener('change', updateManualEarnings);
+    if (manualEndInput) manualEndInput.addEventListener('change', updateManualEarnings);
+    if (manualPauseInput) manualPauseInput.addEventListener('input', updateManualEarnings);
+    if (manualHoursInput) manualHoursInput.addEventListener('input', updateManualEarnings);
+    if (manualPersonSelect) manualPersonSelect.addEventListener('change', updateManualEarnings);
     
     // Finance form
-    document.getElementById('finance-type').addEventListener('change', function() {
-        const debtPaymentSection = document.getElementById('finance-debt-payment');
-        const financePersonSelect = document.getElementById('finance-person');
-        
-        if (this.value === 'income' && financePersonSelect.value) {
-            debtPaymentSection.style.display = 'flex';
-            updateDebtPayment();
-        } else {
-            debtPaymentSection.style.display = 'none';
-        }
-    });
+    const financeType = document.getElementById('finance-type');
+    if (financeType) {
+        financeType.addEventListener('change', function() {
+            const debtPaymentSection = document.getElementById('finance-debt-payment');
+            const financePersonSelect = document.getElementById('finance-person');
+            
+            if (debtPaymentSection && financePersonSelect) {
+                if (this.value === 'income' && financePersonSelect.value) {
+                    debtPaymentSection.style.display = 'flex';
+                    updateDebtPayment();
+                } else {
+                    debtPaymentSection.style.display = 'none';
+                }
+            }
+        });
+    }
     
-    document.getElementById('finance-person').addEventListener('change', function() {
-        const debtPaymentSection = document.getElementById('finance-debt-payment');
-        const financeTypeSelect = document.getElementById('finance-type');
-        
-        if (financeTypeSelect.value === 'income' && this.value) {
-            debtPaymentSection.style.display = 'flex';
-            updateDebtPayment();
-        } else {
-            debtPaymentSection.style.display = 'none';
-        }
-    });
+    const financePerson = document.getElementById('finance-person');
+    if (financePerson) {
+        financePerson.addEventListener('change', function() {
+            const debtPaymentSection = document.getElementById('finance-debt-payment');
+            const financeTypeSelect = document.getElementById('finance-type');
+            
+            if (debtPaymentSection && financeTypeSelect) {
+                if (financeTypeSelect.value === 'income' && this.value) {
+                    debtPaymentSection.style.display = 'flex';
+                    updateDebtPayment();
+                } else {
+                    debtPaymentSection.style.display = 'none';
+                }
+            }
+        });
+    }
     
     function updateDebtPayment() {
-        const amount = parseFloat(document.getElementById('finance-amount').value) || 0;
-        const person = document.getElementById('finance-person').value;
+        const amountInput = document.getElementById('finance-amount');
+        const personSelect = document.getElementById('finance-person');
         const debtRatioInput = document.getElementById('finance-debt-ratio');
+        
+        if (!amountInput || !personSelect || !debtRatioInput) return;
+        
+        const amount = parseFloat(amountInput.value) || 0;
+        const person = personSelect.value;
         
         if (person) {
             // Nastavit výchozí hodnotu podle osoby
@@ -709,103 +804,152 @@ function initForms() {
             const debtAmount = amount * ratio;
             const payout = amount - debtAmount;
             
-            document.getElementById('finance-debt-amount').value = debtAmount.toFixed(2);
-            document.getElementById('finance-payout').value = payout.toFixed(2);
+            const debtAmountInput = document.getElementById('finance-debt-amount');
+            const payoutInput = document.getElementById('finance-payout');
+            
+            if (debtAmountInput) debtAmountInput.value = debtAmount.toFixed(2);
+            if (payoutInput) payoutInput.value = payout.toFixed(2);
         }
     }
     
-    document.getElementById('finance-amount').addEventListener('input', updateDebtPayment);
-    document.getElementById('finance-debt-ratio').addEventListener('input', updateDebtPayment);
+    const financeAmount = document.getElementById('finance-amount');
+    const financeDebtRatio = document.getElementById('finance-debt-ratio');
+    if (financeAmount) financeAmount.addEventListener('input', updateDebtPayment);
+    if (financeDebtRatio) financeDebtRatio.addEventListener('input', updateDebtPayment);
     
     // Timer pauza změna
-```javascript
-document.getElementById('timer-pause').addEventListener('input', updateTimerSummary);
-```
+    const timerPause = document.getElementById('timer-pause');
+    if (timerPause) timerPause.addEventListener('input', updateTimerSummary);
+}
+
 // Event listenery
 function initEventListeners() {
     // Navigace
-    document.getElementById('nav-reports').addEventListener('click', function() {
-        showSection('reports-section');
-        this.classList.add('active');
-        document.getElementById('nav-finances').classList.remove('active');
-        document.getElementById('nav-summary').classList.remove('active');
-    });
+    const navReports = document.getElementById('nav-reports');
+    if (navReports) {
+        navReports.addEventListener('click', function() {
+            showSection('reports-section');
+            this.classList.add('active');
+            document.getElementById('nav-finances')?.classList.remove('active');
+            document.getElementById('nav-summary')?.classList.remove('active');
+        });
+    }
     
-    document.getElementById('nav-finances').addEventListener('click', function() {
-        showSection('finances-section');
-        this.classList.add('active');
-        document.getElementById('nav-reports').classList.remove('active');
-        document.getElementById('nav-summary').classList.remove('active');
-    });
+    const navFinances = document.getElementById('nav-finances');
+    if (navFinances) {
+        navFinances.addEventListener('click', function() {
+            showSection('finances-section');
+            this.classList.add('active');
+            document.getElementById('nav-reports')?.classList.remove('active');
+            document.getElementById('nav-summary')?.classList.remove('active');
+        });
+    }
     
-    document.getElementById('nav-summary').addEventListener('click', function() {
-        showSection('summary-section');
-        this.classList.add('active');
-        document.getElementById('nav-reports').classList.remove('active');
-        document.getElementById('nav-finances').classList.remove('active');
-        updateSummary();
-    });
+    const navSummary = document.getElementById('nav-summary');
+    if (navSummary) {
+        navSummary.addEventListener('click', function() {
+            showSection('summary-section');
+            this.classList.add('active');
+            document.getElementById('nav-reports')?.classList.remove('active');
+            document.getElementById('nav-finances')?.classList.remove('active');
+            updateSummary();
+        });
+    }
     
     // Přepínání režimů ve výkazech
-    document.getElementById('toggle-timer-mode').addEventListener('click', function() {
-        document.getElementById('timer-mode').classList.remove('hidden');
-        document.getElementById('manual-mode').classList.add('hidden');
-        this.classList.add('primary-btn');
-        document.getElementById('toggle-manual-mode').classList.remove('primary-btn');
-    });
+    const toggleTimerMode = document.getElementById('toggle-timer-mode');
+    if (toggleTimerMode) {
+        toggleTimerMode.addEventListener('click', function() {
+            document.getElementById('timer-mode')?.classList.remove('hidden');
+            document.getElementById('manual-mode')?.classList.add('hidden');
+            this.classList.add('primary-btn');
+            document.getElementById('toggle-manual-mode')?.classList.remove('primary-btn');
+        });
+    }
     
-    document.getElementById('toggle-manual-mode').addEventListener('click', function() {
-        document.getElementById('timer-mode').classList.add('hidden');
-        document.getElementById('manual-mode').classList.remove('hidden');
-        this.classList.add('primary-btn');
-        document.getElementById('toggle-timer-mode').classList.remove('primary-btn');
-    });
+    const toggleManualMode = document.getElementById('toggle-manual-mode');
+    if (toggleManualMode) {
+        toggleManualMode.addEventListener('click', function() {
+            document.getElementById('timer-mode')?.classList.add('hidden');
+            document.getElementById('manual-mode')?.classList.remove('hidden');
+            this.classList.add('primary-btn');
+            document.getElementById('toggle-timer-mode')?.classList.remove('primary-btn');
+        });
+    }
     
     // Timer ovládání
-    document.getElementById('start-timer').addEventListener('click', startTimer);
-    document.getElementById('pause-timer').addEventListener('click', pauseTimer);
-    document.getElementById('stop-timer').addEventListener('click', stopTimer);
+    const startTimerBtn = document.getElementById('start-timer');
+    const pauseTimerBtn = document.getElementById('pause-timer');
+    const stopTimerBtn = document.getElementById('stop-timer');
+    
+    if (startTimerBtn) startTimerBtn.addEventListener('click', startTimer);
+    if (pauseTimerBtn) pauseTimerBtn.addEventListener('click', pauseTimer);
+    if (stopTimerBtn) stopTimerBtn.addEventListener('click', stopTimer);
     
     // Filtry výkazů
-    document.getElementById('filter-date').addEventListener('change', renderReportsTable);
-    document.getElementById('filter-person').addEventListener('change', renderReportsTable);
-    document.getElementById('clear-filters').addEventListener('click', function() {
-        document.getElementById('filter-date').value = '';
-        document.getElementById('filter-person').value = '';
-        renderReportsTable();
-    });
+    const filterDate = document.getElementById('filter-date');
+    const filterPerson = document.getElementById('filter-person');
+    const clearFilters = document.getElementById('clear-filters');
+    
+    if (filterDate) filterDate.addEventListener('change', renderReportsTable);
+    if (filterPerson) filterPerson.addEventListener('change', renderReportsTable);
+    if (clearFilters) {
+        clearFilters.addEventListener('click', function() {
+            if (filterDate) filterDate.value = '';
+            if (filterPerson) filterPerson.value = '';
+            renderReportsTable();
+        });
+    }
     
     // Filtry financí
-    document.getElementById('filter-finance-date').addEventListener('change', renderFinancesTable);
-    document.getElementById('filter-finance-type').addEventListener('change', renderFinancesTable);
-    document.getElementById('filter-finance-person').addEventListener('change', renderFinancesTable);
-    document.getElementById('clear-finance-filters').addEventListener('click', function() {
-        document.getElementById('filter-finance-date').value = '';
-        document.getElementById('filter-finance-type').value = '';
-        document.getElementById('filter-finance-person').value = '';
-        renderFinancesTable();
-    });
+    const filterFinanceDate = document.getElementById('filter-finance-date');
+    const filterFinanceType = document.getElementById('filter-finance-type');
+    const filterFinancePerson = document.getElementById('filter-finance-person');
+    const clearFinanceFilters = document.getElementById('clear-finance-filters');
+    
+    if (filterFinanceDate) filterFinanceDate.addEventListener('change', renderFinancesTable);
+    if (filterFinanceType) filterFinanceType.addEventListener('change', renderFinancesTable);
+    if (filterFinancePerson) filterFinancePerson.addEventListener('change', renderFinancesTable);
+    if (clearFinanceFilters) {
+        clearFinanceFilters.addEventListener('click', function() {
+            if (filterFinanceDate) filterFinanceDate.value = '';
+            if (filterFinanceType) filterFinanceType.value = '';
+            if (filterFinancePerson) filterFinancePerson.value = '';
+            renderFinancesTable();
+        });
+    }
     
     // Tlačítka pro ukládání záznamů
-    document.getElementById('save-timer').addEventListener('click', saveTimerReport);
-    document.getElementById('save-manual').addEventListener('click', saveManualReport);
+    const saveTimerBtn = document.getElementById('save-timer');
+    const saveManualBtn = document.getElementById('save-manual');
+    
+    if (saveTimerBtn) saveTimerBtn.addEventListener('click', saveTimerReport);
+    if (saveManualBtn) saveManualBtn.addEventListener('click', saveManualReport);
     
     // Finance sekce
-    document.getElementById('add-finance').addEventListener('click', function() {
-        document.getElementById('finance-form').classList.remove('hidden');
-        this.classList.add('hidden');
-    });
+    const addFinanceBtn = document.getElementById('add-finance');
+    if (addFinanceBtn) {
+        addFinanceBtn.addEventListener('click', function() {
+            document.getElementById('finance-form')?.classList.remove('hidden');
+            this.classList.add('hidden');
+        });
+    }
     
-    document.getElementById('cancel-finance').addEventListener('click', function() {
-        document.getElementById('finance-form').classList.add('hidden');
-        document.getElementById('add-finance').classList.remove('hidden');
-        resetFinanceForm();
-    });
+    const cancelFinanceBtn = document.getElementById('cancel-finance');
+    if (cancelFinanceBtn) {
+        cancelFinanceBtn.addEventListener('click', function() {
+            document.getElementById('finance-form')?.classList.add('hidden');
+            document.getElementById('add-finance')?.classList.remove('hidden');
+            resetFinanceForm();
+        });
+    }
     
-    document.getElementById('save-finance').addEventListener('click', saveFinanceRecord);
+    const saveFinanceBtn = document.getElementById('save-finance');
+    if (saveFinanceBtn) saveFinanceBtn.addEventListener('click', saveFinanceRecord);
     
     // Export
-    document.getElementById('export-data').addEventListener('click', exportToCSV);
+    const exportDataBtn = document.getElementById('export-data');
+    if (exportDataBtn) exportDataBtn.addEventListener('click', exportToCSV);
     
     // Přidat event listener pro instalaci PWA
     const installButton = document.getElementById('install-app');
@@ -814,24 +958,26 @@ function initEventListeners() {
     window.addEventListener('beforeinstallprompt', (e) => {
         e.preventDefault();
         deferredPrompt = e;
-        installButton.classList.remove('hidden');
+        if (installButton) installButton.classList.remove('hidden');
     });
     
-    installButton.addEventListener('click', async () => {
-        if (!deferredPrompt) return;
-        
-        deferredPrompt.prompt();
-        const { outcome } = await deferredPrompt.userChoice;
-        
-        if (outcome === 'accepted') {
-            console.log('Uživatel aplikaci nainstaloval');
-        } else {
-            console.log('Uživatel instalaci odmítl');
-        }
-        
-        deferredPrompt = null;
-        installButton.classList.add('hidden');
-    });
+    if (installButton) {
+        installButton.addEventListener('click', async () => {
+            if (!deferredPrompt) return;
+            
+            deferredPrompt.prompt();
+            const { outcome } = await deferredPrompt.userChoice;
+            
+            if (outcome === 'accepted') {
+                console.log('Uživatel aplikaci nainstaloval');
+            } else {
+                console.log('Uživatel instalaci odmítl');
+            }
+            
+            deferredPrompt = null;
+            installButton.classList.add('hidden');
+        });
+    }
 }
 
 // Funkce pro zobrazení sekce
@@ -841,18 +987,27 @@ function showSection(sectionId) {
         section.classList.remove('active');
     });
     
-    document.getElementById(sectionId).classList.add('active');
+    const section = document.getElementById(sectionId);
+    if (section) section.classList.add('active');
 }
 
 // Funkce pro ukládání záznamů
 function saveTimerReport() {
     const date = new Date().toISOString().split('T')[0];
-    const person = document.getElementById('timer-person').value;
-    let category = document.getElementById('timer-category').value;
+    const personSelect = document.getElementById('timer-person');
+    const categorySelect = document.getElementById('timer-category');
+    
+    if (!personSelect || !categorySelect) return;
+    
+    const person = personSelect.value;
+    let category = categorySelect.value;
     
     // Kontrola vlastní kategorie
     if (category === 'custom') {
-        const customCategory = document.getElementById('timer-custom-category').value.trim();
+        const customCategoryInput = document.getElementById('timer-custom-category');
+        if (!customCategoryInput) return;
+        
+        const customCategory = customCategoryInput.value.trim();
         
         if (!customCategory) {
             showNotification('Prosím zadejte vlastní kategorii.', 'error');
@@ -868,11 +1023,19 @@ function saveTimerReport() {
         }
     }
     
-    const startTime = document.getElementById('timer-start').value;
-    const endTime = document.getElementById('timer-end').value;
-    const pauseMinutes = parseInt(document.getElementById('timer-pause').value) || 0;
-    const hours = parseFloat(document.getElementById('timer-hours').value);
-    const earnings = parseFloat(document.getElementById('timer-earnings').value.replace(/\s/g, '').replace(',', '.').replace('Kč', ''));
+    const startTimeInput = document.getElementById('timer-start');
+    const endTimeInput = document.getElementById('timer-end');
+    const pauseInput = document.getElementById('timer-pause');
+    const hoursInput = document.getElementById('timer-hours');
+    const earningsInput = document.getElementById('timer-earnings');
+    
+    if (!startTimeInput || !endTimeInput || !pauseInput || !hoursInput || !earningsInput) return;
+    
+    const startTime = startTimeInput.value;
+    const endTime = endTimeInput.value;
+    const pauseMinutes = parseInt(pauseInput.value) || 0;
+    const hours = parseFloat(hoursInput.value);
+    const earnings = parseFloat(earningsInput.value.replace(/\s/g, '').replace(',', '.').replace('Kč', ''));
     
     const reportData = {
         date,
@@ -892,13 +1055,22 @@ function saveTimerReport() {
 }
 
 function saveManualReport() {
-    const date = document.getElementById('manual-date').value;
-    const person = document.getElementById('manual-person').value;
-    let category = document.getElementById('manual-category').value;
+    const dateInput = document.getElementById('manual-date');
+    const personSelect = document.getElementById('manual-person');
+    const categorySelect = document.getElementById('manual-category');
+    
+    if (!dateInput || !personSelect || !categorySelect) return;
+    
+    const date = dateInput.value;
+    const person = personSelect.value;
+    let category = categorySelect.value;
     
     // Kontrola vlastní kategorie
     if (category === 'custom') {
-        const customCategory = document.getElementById('manual-custom-category').value.trim();
+        const customCategoryInput = document.getElementById('manual-custom-category');
+        if (!customCategoryInput) return;
+        
+        const customCategory = customCategoryInput.value.trim();
         
         if (!customCategory) {
             showNotification('Prosím zadejte vlastní kategorii.', 'error');
@@ -914,15 +1086,22 @@ function saveManualReport() {
         }
     }
     
-    const startTime = document.getElementById('manual-start').value;
-    const endTime = document.getElementById('manual-end').value;
-    const pauseMinutes = parseInt(document.getElementById('manual-pause').value) || 0;
+    const startTimeInput = document.getElementById('manual-start');
+    const endTimeInput = document.getElementById('manual-end');
+    const pauseInput = document.getElementById('manual-pause');
+    const hoursInput = document.getElementById('manual-hours');
+    
+    if (!startTimeInput || !endTimeInput || !pauseInput || !hoursInput) return;
+    
+    const startTime = startTimeInput.value;
+    const endTime = endTimeInput.value;
+    const pauseMinutes = parseInt(pauseInput.value) || 0;
     
     let hours;
     
     // Pokud je vyplněn počet hodin ručně, použijeme to
-    if (document.getElementById('manual-hours').value) {
-        hours = parseHoursInput(document.getElementById('manual-hours').value);
+    if (hoursInput.value) {
+        hours = parseHoursInput(hoursInput.value);
     } 
     // Jinak vypočítáme z času začátku, konce a pauzy
     else if (startTime && endTime) {
@@ -952,20 +1131,31 @@ function saveManualReport() {
 }
 
 function saveFinanceRecord() {
-    const date = document.getElementById('finance-date').value;
-    const type = document.getElementById('finance-type').value;
-    const amount = parseFloat(document.getElementById('finance-amount').value);
-    const person = document.getElementById('finance-person').value;
-    const note = document.getElementById('finance-note').value;
+    const dateInput = document.getElementById('finance-date');
+    const typeSelect = document.getElementById('finance-type');
+    const amountInput = document.getElementById('finance-amount');
+    const personSelect = document.getElementById('finance-person');
+    const noteInput = document.getElementById('finance-note');
+    
+    if (!dateInput || !typeSelect || !amountInput || !personSelect || !noteInput) return;
+    
+    const date = dateInput.value;
+    const type = typeSelect.value;
+    const amount = parseFloat(amountInput.value);
+    const person = personSelect.value;
+    const note = noteInput.value;
     
     let debtPayment = null;
     let payout = null;
     
     // Výpočet splátky dluhu a vyplacené částky pro příjmy
     if (type === 'income' && person) {
-        const ratio = parseFloat(document.getElementById('finance-debt-ratio').value) / 100;
-        debtPayment = amount * ratio;
-        payout = amount - debtPayment;
+        const debtRatioInput = document.getElementById('finance-debt-ratio');
+        if (debtRatioInput) {
+            const ratio = parseFloat(debtRatioInput.value) / 100;
+            debtPayment = amount * ratio;
+            payout = amount - debtPayment;
+        }
     }
     
     const financeData = {
@@ -981,42 +1171,68 @@ function saveFinanceRecord() {
     if (validateFinanceRecord(financeData)) {
         addFinance(financeData);
         resetFinanceForm();
-        document.getElementById('finance-form').classList.add('hidden');
-        document.getElementById('add-finance').classList.remove('hidden');
+        document.getElementById('finance-form')?.classList.add('hidden');
+        document.getElementById('add-finance')?.classList.remove('hidden');
     }
 }
 
 // Reset formulářů
 function resetTimerForm() {
-    document.getElementById('timer-summary').classList.add('hidden');
-    document.getElementById('timer-pause').value = '0';
+    const summary = document.getElementById('timer-summary');
+    const pauseInput = document.getElementById('timer-pause');
+    
+    if (summary) summary.classList.add('hidden');
+    if (pauseInput) pauseInput.value = '0';
     resetTimer();
 }
 
 function resetManualForm() {
     const today = new Date().toISOString().split('T')[0];
-    document.getElementById('manual-date').value = today;
-    document.getElementById('manual-start').value = '';
-    document.getElementById('manual-end').value = '';
-    document.getElementById('manual-pause').value = '0';
-    document.getElementById('manual-hours').value = '';
-    document.getElementById('manual-earnings').value = '';
-    document.getElementById('manual-custom-category').value = '';
-    document.getElementById('manual-custom-category').classList.add('hidden');
-    document.getElementById('manual-category').value = document.getElementById('manual-category').options[0].value;
+    const dateInput = document.getElementById('manual-date');
+    const startInput = document.getElementById('manual-start');
+    const endInput = document.getElementById('manual-end');
+    const pauseInput = document.getElementById('manual-pause');
+    const hoursInput = document.getElementById('manual-hours');
+    const earningsInput = document.getElementById('manual-earnings');
+    const customCategoryInput = document.getElementById('manual-custom-category');
+    const categorySelect = document.getElementById('manual-category');
+    
+    if (dateInput) dateInput.value = today;
+    if (startInput) startInput.value = '';
+    if (endInput) endInput.value = '';
+    if (pauseInput) pauseInput.value = '0';
+    if (hoursInput) hoursInput.value = '';
+    if (earningsInput) earningsInput.value = '';
+    if (customCategoryInput) {
+        customCategoryInput.value = '';
+        customCategoryInput.classList.add('hidden');
+    }
+    if (categorySelect && categorySelect.options[0]) {
+        categorySelect.value = categorySelect.options[0].value;
+    }
 }
 
 function resetFinanceForm() {
     const today = new Date().toISOString().split('T')[0];
-    document.getElementById('finance-date').value = today;
-    document.getElementById('finance-type').value = 'income';
-    document.getElementById('finance-amount').value = '';
-    document.getElementById('finance-person').value = '';
-    document.getElementById('finance-note').value = '';
-    document.getElementById('finance-debt-ratio').value = '0';
-    document.getElementById('finance-debt-amount').value = '';
-    document.getElementById('finance-payout').value = '';
-    document.getElementById('finance-debt-payment').style.display = 'none';
+    const dateInput = document.getElementById('finance-date');
+    const typeSelect = document.getElementById('finance-type');
+    const amountInput = document.getElementById('finance-amount');
+    const personSelect = document.getElementById('finance-person');
+    const noteInput = document.getElementById('finance-note');
+    const debtRatioInput = document.getElementById('finance-debt-ratio');
+    const debtAmountInput = document.getElementById('finance-debt-amount');
+    const payoutInput = document.getElementById('finance-payout');
+    const debtPaymentSection = document.getElementById('finance-debt-payment');
+    
+    if (dateInput) dateInput.value = today;
+    if (typeSelect) typeSelect.value = 'income';
+    if (amountInput) amountInput.value = '';
+    if (personSelect) personSelect.value = '';
+    if (noteInput) noteInput.value = '';
+    if (debtRatioInput) debtRatioInput.value = '0';
+    if (debtAmountInput) debtAmountInput.value = '';
+    if (payoutInput) payoutInput.value = '';
+    if (debtPaymentSection) debtPaymentSection.style.display = 'none';
 }
 
 // Inicializace aplikace
