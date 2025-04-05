@@ -1,5 +1,5 @@
 // Cache name zahrnuje verzi (při změně kódu zvyšte verzi pro aktivaci nového SW)
-const CACHE_NAME = 'pracovni-vykazy-v1.0';
+const CACHE_NAME = 'pracovni-vykazy-v2.0';
 
 // Soubory, které budou cachované při instalaci Service Workeru
 const FILES_TO_CACHE = [
