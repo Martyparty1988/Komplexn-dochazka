@@ -1,22 +1,22 @@
 {
-  "name": "Pracovní výkazy & Finance",
-  "short_name": "Výkazy & Finance",
-  "description": "Aplikace pro správu pracovních výkazů, financí a dluhů",
-  "start_url": "/index.html",
+  "name": "Pracovní Výkazy Maru & Marty",
+  "short_name": "Výkazy",
+  "description": "Aplikace pro evidenci pracovních výkazů a financí.",
+  "start_url": "/",
   "display": "standalone",
-  "background_color": "#f5f5f7",
-  "theme_color": "#4a6da7",
+  "background_color": "#ffffff",
+  "theme_color": "#4CAF50",
   "icons": [
     {
-      "src": "/icons/icon-192x192.png",
+      "src": "icons/icon-192x192.png",
       "sizes": "192x192",
       "type": "image/png"
     },
     {
-      "src": "/icons/icon-512x512.png",
+      "src": "icons/icon-512x512.png",
       "sizes": "512x512",
-      "type": "image/png"
+      "type": "image/png",
+      "purpose": "any maskable"
     }
-  ],
-  "scope": "/"
+  ]
 }
