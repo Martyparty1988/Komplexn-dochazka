@@ -3,123 +3,317 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <meta name="theme-color" content="#4a6da7">
-    <title>Pracovní výkazy & Finance</title>
-    <link rel="manifest" href="manifest.json">
-    <link rel="apple-touch-icon" href="icons/icon-192x192.png">
-    <link rel="icon" href="icons/favicon.ico" type="image/x-icon">
+    <meta name="theme-color" content="#4CAF50"/>
+    <title>Pracovní Výkazy</title>
+    <link rel="stylesheet" href="style.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-
-    <style>
-        /* [Celý inline CSS z původního souboru zůstává nezměněno] */
-        :root {
-            --primary-color: #4a6da7;
-            --primary-dark: #3b5886;
-            --secondary-color: #f8f9fa;
-            --accent-color: #e63946;
-            --text-color: #333;
-            --light-text: #6c757d;
-            --success-color: #28a745;
-            --warning-color: #ffc107;
-            --danger-color: #dc3545;
-            --border-color: #dee2e6;
-            --card-bg: #ffffff;
-            --header-height: 60px;
-            --shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
-            --radius: 6px;
-            --spacing: 1rem;
-        }
-
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-        }
-
-        body {
-            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
-            line-height: 1.6;
-            color: var(--text-color);
-            background-color: #f5f5f7;
-            padding-bottom: 60px;
-        }
-
-        /* [Zbývající CSS zůstává nezměněno, zahrnuje typography, layout, forms, buttons, tables, apod.] */
-        /* ... [zde by měl být zbytek CSS z původního souboru] ... */
-
-        /* Animations */
-        @keyframes fadeIn {
-            from { opacity: 0; }
-            to { opacity: 1; }
-        }
-    </style>
+    <link rel="manifest" href="manifest.json">
+    <link rel="icon" href="icons/favicon.ico" type="image/x-icon">
+    <link rel="apple-touch-icon" href="icons/icon-192x192.png">
 </head>
 <body>
-    <header>
-        <h1>Pracovní výkazy & Finance</h1>
+    <div class="container">
+        <h1>Pracovní Výkazy</h1>
+
         <nav>
-            <button id="nav-reports" class="active">Výkazy</button>
-            <button id="nav-finances">Finance</button>
-            <button id="nav-summary">Souhrn</button>
+            <button id="nav-overview" class="active"><i class="fas fa-tachometer-alt"></i> Přehled</button>
+            <button id="nav-entry"><i class="fas fa-plus-circle"></i> Zadání</button>
+            <button id="nav-reports"><i class="fas fa-list-alt"></i> Výkazy</button>
+            <button id="nav-finances"><i class="fas fa-coins"></i> Finance</button>
+            <button id="nav-settings"><i class="fas fa-cog"></i> Nastavení</button> <!-- Přidáno tlačítko Nastavení -->
         </nav>
-    </header>
 
-    <main>
-        <!-- [Celý obsah sekcí (reports-section, finances-section, summary-section) zůstává nezměněn] -->
-        <!-- ... [zde by měl být zbytek HTML z původního souboru] ... -->
-    </main>
+        <!-- Sekce Přehled -->
+        <section id="overview-section" class="section active">
+            <h2>Celkový Přehled</h2>
+            <div class="summary">
+                <div class="summary-box">
+                    <h3>Maru</h3>
+                    <p><i class="fas fa-user"></i> Odpracováno: <span id="maru-total-hours">0.00</span> hodin</p>
+                    <p><i class="fas fa-euro-sign"></i> Výdělek: <span id="maru-total-earnings">0 Kč</span></p>
+                </div>
+                <div class="summary-box">
+                    <h3>Marty</h3>
+                    <p><i class="fas fa-user"></i> Odpracováno: <span id="marty-total-hours">0.00</span> hodin</p>
+                    <p><i class="fas fa-euro-sign"></i> Výdělek: <span id="marty-total-earnings">0 Kč</span></p>
+                </div>
+                <div class="summary-box total-summary">
+                    <h3>Celkem</h3>
+                    <p><i class="fas fa-clock"></i> Odpracováno: <span id="total-hours">0.00</span> hodin</p>
+                    <p><i class="fas fa-coins"></i> Výdělek: <span id="total-earnings">0 Kč</span></p>
+                    <!-- Zde můžeme přidat i přehled financí -->
+                    <p><i class="fas fa-calculator"></i> Finance: <span id="finance-summary">Načítání...</span></p>
+                </div>
+            </div>
+             <button id="export-data" class="button export-button"><i class="fas fa-file-csv"></i> Exportovat vše do CSV</button>
+             <button id="sync-data-manual" class="button sync-button"><i class="fas fa-sync"></i> Synchronizovat s Cloudem</button>
+        </section>
 
-    <footer>
-        <p>Pracovní výkazy & Finance © 2025 | Verze 1.0</p>
-        <button id="install-app" class="hidden btn">
-            <i class="fas fa-download"></i> Nainstalovat aplikaci
-        </button>
-    </footer>
+        <!-- Sekce Zadání -->
+        <section id="entry-section" class="section">
+            <h2>Zadat Výkaz</h2>
+            <div class="entry-mode-toggle">
+                <button id="toggle-timer-mode" class="button"><i class="fas fa-stopwatch"></i> Režim Časovače</button>
+                <button id="toggle-manual-mode" class="button"><i class="fas fa-keyboard"></i> Manuální Režim</button>
+            </div>
 
-    <div id="notification" class="notification hidden"></div>
+            <!-- Režim Časovače -->
+            <div id="timer-mode" class="entry-mode">
+                <h3><i class="fas fa-stopwatch"></i> Časovač</h3>
+                <div class="form-grid">
+                    <div>
+                        <label for="timer-person"><i class="fas fa-user"></i> Osoba:</label>
+                        <select id="timer-person">
+                            <option value="Maru">Maru</option>
+                            <option value="Marty">Marty</option>
+                        </select>
+                    </div>
+                    <div>
+                        <label for="timer-category"><i class="fas fa-tag"></i> Kategorie:</label>
+                        <select id="timer-category">
+                            <option value="Úklid">Úklid</option>
+                            <option value="Komunikace s hostem">Komunikace s hostem</option>
+                            <option value="Nákup">Nákup</option>
+                            <option value="Správa">Správa</option>
+                            <option value="Údržba">Údržba</option>
+                            <option value="custom">Jiná (zadat)</option>
+                        </select>
+                        <input type="text" id="timer-custom-category" class="hidden custom-category-input" placeholder="Zadejte vlastní kategorii">
+                    </div>
+                </div>
+                <div class="timer-controls">
+                    <button id="start-timer" class="button timer-button start"><i class="fas fa-play"></i> Start</button>
+                    <button id="pause-timer" class="button timer-button pause" disabled><i class="fas fa-pause"></i> Pauza</button>
+                    <button id="stop-timer" class="button timer-button stop" disabled><i class="fas fa-stop"></i> Stop</button>
+                </div>
+                <div id="timer-display">00:00:00</div>
+                <div class="timer-summary hidden">
+                    <h4>Souhrn Časovače</h4>
+                     <div class="form-grid">
+                        <div>
+                            <label for="timer-start"><i class="fas fa-clock"></i> Začátek:</label>
+                            <input type="time" id="timer-start" readonly>
+                        </div>
+                         <div>
+                            <label for="timer-end"><i class="fas fa-clock"></i> Konec:</label>
+                            <input type="time" id="timer-end" readonly>
+                         </div>
+                         <div>
+                            <label for="timer-pause"><i class="fas fa-coffee"></i> Pauza (min):</label>
+                            <input type="number" id="timer-pause" value="0" min="0">
+                        </div>
+                        <div>
+                            <label for="timer-hours"><i class="fas fa-hourglass-half"></i> Hodiny:</label>
+                            <input type="text" id="timer-hours" readonly>
+                        </div>
+                         <div>
+                            <label><i class="fas fa-euro-sign"></i> Výdělek:</label>
+                            <span id="timer-earnings">0 Kč</span>
+                        </div>
+                    </div>
+                    <button id="save-timer" class="button save-button"><i class="fas fa-save"></i> Uložit výkaz z časovače</button>
+                </div>
+            </div>
+
+            <!-- Manuální Režim -->
+            <div id="manual-mode" class="entry-mode hidden">
+                <h3><i class="fas fa-keyboard"></i> Manuální Zadání</h3>
+                 <div class="form-grid">
+                    <div>
+                        <label for="manual-date"><i class="fas fa-calendar-alt"></i> Datum:</label>
+                        <input type="date" id="manual-date">
+                    </div>
+                    <div>
+                        <label for="manual-person"><i class="fas fa-user"></i> Osoba:</label>
+                        <select id="manual-person">
+                            <option value="Maru">Maru</option>
+                            <option value="Marty">Marty</option>
+                        </select>
+                    </div>
+                     <div>
+                        <label for="manual-category"><i class="fas fa-tag"></i> Kategorie:</label>
+                        <select id="manual-category">
+                             <option value="Úklid">Úklid</option>
+                             <option value="Komunikace s hostem">Komunikace s hostem</option>
+                             <option value="Nákup">Nákup</option>
+                             <option value="Správa">Správa</option>
+                             <option value="Údržba">Údržba</option>
+                             <option value="custom">Jiná (zadat)</option>
+                        </select>
+                         <input type="text" id="manual-custom-category" class="hidden custom-category-input" placeholder="Zadejte vlastní kategorii">
+                    </div>
+                    <div>
+                        <label for="manual-hours"><i class="fas fa-hourglass-half"></i> Hodiny (např. 2.5 nebo 2:30):</label>
+                        <input type="text" id="manual-hours" placeholder="např. 2.5 nebo 2:30">
+                    </div>
+                    <div>
+                        <label for="manual-start"><i class="fas fa-clock"></i> Začátek (volitelné):</label>
+                        <input type="time" id="manual-start">
+                    </div>
+                     <div>
+                        <label for="manual-end"><i class="fas fa-clock"></i> Konec (volitelné):</label>
+                        <input type="time" id="manual-end">
+                    </div>
+                     <div>
+                        <label for="manual-pause"><i class="fas fa-coffee"></i> Pauza (min, volitelné):</label>
+                        <input type="number" id="manual-pause" value="0" min="0">
+                    </div>
+                 </div>
+                 <button id="save-manual" class="button save-button"><i class="fas fa-save"></i> Uložit manuální výkaz</button>
+            </div>
+        </section>
+
+        <!-- Sekce Výkazy -->
+        <section id="reports-section" class="section">
+            <h2>Seznam Výkazů</h2>
+            <div class="filters">
+                <label for="filter-person">Osoba:</label>
+                <select id="filter-person">
+                    <option value="all">Všichni</option>
+                    <option value="Maru">Maru</option>
+                    <option value="Marty">Marty</option>
+                </select>
+                <label for="filter-category">Kategorie:</label>
+                <select id="filter-category">
+                    <option value="all">Všechny</option>
+                     {/* Kategorie budou doplněny dynamicky */}
+                </select>
+                <label for="filter-month">Měsíc:</label>
+                <input type="month" id="filter-month">
+                <button id="apply-filters" class="button filter-button"><i class="fas fa-filter"></i> Filtrovat</button>
+                <button id="reset-filters" class="button filter-button"><i class="fas fa-undo"></i> Zrušit filtr</button>
+            </div>
+            <div class="table-container">
+                <table id="reports-table">
+                    <thead>
+                        <tr>
+                            <th>Datum</th>
+                            <th>Osoba</th>
+                            <th>Kategorie</th>
+                            <th>Začátek</th>
+                            <th>Konec</th>
+                            <th>Pauza</th>
+                            <th>Odpracováno</th>
+                            <th>Výdělek</th>
+                            <th>Akce</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <!-- Řádky budou vloženy pomocí JavaScriptu -->
+                    </tbody>
+                </table>
+            </div>
+        </section>
+
+        <!-- Sekce Finance -->
+        <section id="finances-section" class="section">
+            <h2>Finance (Náklady a Příjmy)</h2>
+            <button id="add-finance" class="button"><i class="fas fa-plus"></i> Přidat záznam</button>
+
+            <form id="finance-form" class="hidden entry-mode">
+                <h3>Nový Finanční Záznam</h3>
+                 <div class="form-grid">
+                    <div>
+                        <label for="finance-date"><i class="fas fa-calendar-alt"></i> Datum:</label>
+                        <input type="date" id="finance-date" required>
+                    </div>
+                    <div>
+                        <label for="finance-type"><i class="fas fa-exchange-alt"></i> Typ:</label>
+                        <select id="finance-type" required>
+                            <option value="Náklad">Náklad</option>
+                            <option value="Příjem">Příjem</option>
+                        </select>
+                    </div>
+                     <div>
+                        <label for="finance-amount"><i class="fas fa-dollar-sign"></i> Částka (Kč):</label>
+                        <input type="number" id="finance-amount" step="0.01" required min="0.01">
+                    </div>
+                     <div>
+                         <label for="finance-person"><i class="fas fa-user"></i> Osoba (volitelné):</label>
+                         <select id="finance-person">
+                             <option value="">-- Vyberte --</option>
+                             <option value="Maru">Maru</option>
+                             <option value="Marty">Marty</option>
+                         </select>
+                    </div>
+                    <div class="full-width">
+                         <label for="finance-note"><i class="fas fa-sticky-note"></i> Poznámka:</label>
+                         <input type="text" id="finance-note" placeholder="Např. Nákup čistících prostředků">
+                    </div>
+                 </div>
+                 <div class="form-actions">
+                    <button type="button" id="save-finance" class="button save-button"><i class="fas fa-save"></i> Uložit záznam</button>
+                    <button type="button" id="cancel-finance" class="button cancel-button"><i class="fas fa-times"></i> Zrušit</button>
+                 </div>
+            </form>
+
+             <div class="table-container">
+                 <table id="finances-table">
+                    <thead>
+                        <tr>
+                            <th>Datum</th>
+                            <th>Typ</th>
+                            <th>Částka</th>
+                            <th>Osoba</th>
+                            <th>Poznámka</th>
+                            <th>Akce</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <!-- Řádky budou vloženy pomocí JavaScriptu -->
+                    </tbody>
+                </table>
+            </div>
+        </section>
+
+         <!-- Sekce Nastavení -->
+        <section id="settings-section" class="section">
+            <h2>Nastavení</h2>
+            <div class="settings-group">
+                <h3>Hodinové Sazby</h3>
+                <div class="form-grid">
+                    <div>
+                        <label for="rate-maru">Sazba Maru (Kč/hod):</label>
+                        <input type="number" id="rate-maru" step="1" min="0">
+                    </div>
+                    <div>
+                        <label for="rate-marty">Sazba Marty (Kč/hod):</label>
+                        <input type="number" id="rate-marty" step="1" min="0">
+                    </div>
+                </div>
+                 <button id="save-rates" class="button save-button"><i class="fas fa-save"></i> Uložit sazby</button>
+            </div>
+
+            <div class="settings-group">
+                <h3>Správa Kategorií</h3>
+                <label for="new-category-name">Nová kategorie:</label>
+                <input type="text" id="new-category-name" placeholder="Název nové kategorie">
+                <button id="add-new-category" class="button"><i class="fas fa-plus"></i> Přidat kategorii</button>
+
+                <h4>Existující Kategorie:</h4>
+                <ul id="category-list">
+                    {/* Seznam kategorií bude naplněn dynamicky */}
+                </ul>
+            </div>
+
+            <div class="settings-group">
+                <h3>Data</h3>
+                 <button id="backup-data" class="button"><i class="fas fa-download"></i> Zálohovat data (Lokálně)</button>
+                 <label for="import-data-file" class="button"><i class="fas fa-upload"></i> Obnovit data ze zálohy</label>
+                 <input type="file" id="import-data-file" accept=".json" style="display: none;">
+                 <button id="clear-local-data" class="button danger-button"><i class="fas fa-trash-alt"></i> Smazat všechna lokální data</button>
+            </div>
+        </section>
+
+
+    </div>
+
+    <div id="notification" class="notification"></div>
+
+    <!-- Firebase -->
+    <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-app.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-database.js"></script>
 
     <script src="app.js"></script>
-    <script>
-        // [Celý inline JavaScript pro Service Worker a PWA instalaci zůstává nezměněn]
-        if ('serviceWorker' in navigator) {
-            window.addEventListener('load', () => {
-                navigator.serviceWorker.register('/service-worker.js')
-                    .then(reg => console.log('Service Worker registrován!', reg))
-                    .catch(err => console.log('Service Worker registrace selhala:', err));
-            });
-        }
-
-        let deferredPrompt;
-        const installButton = document.getElementById('install-app');
-
-        window.addEventListener('beforeinstallprompt', (e) => {
-            e.preventDefault();
-            deferredPrompt = e;
-            installButton.classList.remove('hidden');
-            console.log('`beforeinstallprompt` event fired.');
-        });
-
-        installButton.addEventListener('click', async () => {
-            installButton.classList.add('hidden');
-            deferredPrompt.prompt();
-            const { outcome } = await deferredPrompt.userChoice;
-            console.log(`User response to the install prompt: ${outcome}`);
-            deferredPrompt = null;
-        });
-
-        window.addEventListener('appinstalled', () => {
-            installButton.classList.add('hidden');
-            deferredPrompt = null;
-            console.log('PWA was installed');
-            const notification = document.getElementById('notification');
-            notification.textContent = 'Aplikace byla úspěšně nainstalována!';
-            notification.className = 'notification success show';
-            setTimeout(() => {
-                notification.className = 'notification success';
-                setTimeout(() => notification.classList.add('hidden'), 300);
-            }, 3000);
-        });
-    </script>
-    <script>(function(){function c(){var b=a.contentDocument||a.contentWindow.document;if(b){var d=b.createElement('script');d.innerHTML="window.__CF$cv$params={r:'92be7cdb5940bcdd',t:'MTc0MzkxMzE3NC4wMDAwMDA='};var a=document.createElement('script');a.nonce='';a.src='/cdn-cgi/challenge-platform/scripts/jsd/main.js';document.getElementsByTagName('head')[0].appendChild(a);";b.getElementsByTagName('head')[0].appendChild(d)}}if(document.body){var a=document.createElement('iframe');a.height=1;a.width=1;a.style.position='absolute';a.style.top=0;a.style.left=0;a.style.border='none';a.style.visibility='hidden';document.body.appendChild(a);if('loading'!==document.readyState)c();else if(window.addEventListener)document.addEventListener('DOMContentLoaded',c);else{var e=document.onreadystatechange||function(){};document.onreadystatechange=function(b){e(b);'loading'!==document.readyState&&(document.onreadystatechange=e,c())}}}})();</script>
 </body>
 </html>
