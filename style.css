@@ -1,599 +1,445 @@
-/* --- Globální Nastavení a Barevná Paleta --- */
-:root {
-    --primary-color: #28a745; /* Jasnější zelená */
-    --primary-color-dark: #218838;
-    --secondary-color: #ffc107; /* Žlutá/Oranžová */
-    --secondary-color-dark: #e0a800;
-    --danger-color: #dc3545; /* Červená */
-    --danger-color-dark: #c82333;
-    --info-color: #17a2b8; /* Tyrkysová/Modrá */
-    --info-color-dark: #138496;
-    --light-gray: #f8f9fa; /* Velmi světle šedá (pozadí) */
-    --medium-gray: #dee2e6; /* Středně šedá (okraje) */
-    --dark-gray: #495057; /* Tmavě šedá (některý text) */
-    --text-color: #343a40; /* Hlavní barva textu (tmavší šedá) */
-    --white: #fff;
-    --border-radius: 0.3rem; /* Mírně zaoblené rohy */
-    --box-shadow: 0 0.125rem 0.25rem rgba(0, 0, 0, 0.075); /* Jemný stín */
-    --box-shadow-lg: 0 0.5rem 1rem rgba(0, 0, 0, 0.15); /* Větší stín */
-    --font-family-sans-serif: system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial, "Noto Sans", sans-serif, "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol", "Noto Color Emoji";
-}
-
+/* Reset a základní nastavení */
 * {
     box-sizing: border-box;
     margin: 0;
     padding: 0;
 }
 
+:root {
+    /* Pastelové barvy */
+    --color-primary: #a2d2ff; /* Světle modrá */
+    --color-secondary: #ffafcc; /* Maru - Růžová */
+    --color-tertiary: #bde0fe; /* Marty - Tyrkysová světlejší */
+    --color-accent: #ffc8dd;
+    --color-background: #f8f9fa;
+    --color-text: #333;
+    --color-text-light: #555;
+    --color-border: #e0e0e0;
+    --color-shadow: rgba(0, 0, 0, 0.1);
+    --color-success: #a7c957;
+    --color-warning: #f2cc8f;
+    --color-danger: #e63946;
+    --color-white: #ffffff;
+
+    /* Fonty */
+    --font-primary: 'Poppins', sans-serif;
+    --font-secondary: 'Roboto', sans-serif;
+
+    /* Ostatní */
+    --border-radius: 8px;
+    --shadow-small: 0 2px 4px var(--color-shadow);
+    --shadow-medium: 0 4px 8px var(--color-shadow);
+}
+
+html {
+    font-size: 16px; /* Base font size */
+}
+
 body {
-    font-family: var(--font-family-sans-serif);
+    font-family: var(--font-secondary);
+    background-color: var(--color-background);
+    color: var(--color-text);
     line-height: 1.6;
-    background-color: var(--light-gray);
-    color: var(--text-color);
-    padding: 20px;
-    font-size: 16px;
+    padding-bottom: 70px; /* Prostor pro spodní nav */
 }
 
-.container {
-    max-width: 1140px; /* Širší kontejner */
-    margin: 20px auto; /* Větší mezera nahoře/dole */
-    background: var(--white);
-    padding: 30px 40px;
-    border-radius: calc(var(--border-radius) * 2); /* Výraznější zaoblení kontejneru */
-    box-shadow: var(--box-shadow-lg);
-}
-
-/* --- Typografie --- */
-h1, h2, h3, h4 {
-    color: var(--text-color); /* Hlavní barva textu pro nadpisy */
-    margin-bottom: 1em;
-    font-weight: 600; /* Mírně tučnější */
-}
-
-h1 {
+header {
+    background-color: var(--color-primary);
+    color: var(--color-white);
+    padding: 1rem 1.5rem;
     text-align: center;
-    margin-bottom: 1.5em;
-    font-size: 2.25em;
-    color: var(--primary-color); /* Hlavní nadpis v primární barvě */
-    font-weight: 700;
+    box-shadow: var(--shadow-small);
 }
 
-h2 {
-    font-size: 1.75em;
-    border-bottom: 3px solid var(--primary-color);
-    padding-bottom: 8px;
-    margin-bottom: 1.2em;
+#app-title {
+    font-family: var(--font-primary);
+    font-weight: 600;
 }
 
-h3 {
-     font-size: 1.4em;
-     color: var(--dark-gray);
-     margin-bottom: 0.8em;
-}
-h4 {
-     font-size: 1.15em;
-     font-weight: 600;
+main {
+    padding: 1rem;
 }
 
-p {
+h2, h3 {
+    font-family: var(--font-primary);
+    margin-bottom: 1rem;
+    color: var(--color-primary);
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+}
+h2 i, h3 i {
+    color: var(--color-accent);
+}
+
+
+/* Sekce */
+.app-section {
+    display: none; /* Skryto defaultně */
+    animation: fadeIn 0.5s ease-in-out;
+}
+
+.app-section.active-section {
+    display: block;
+}
+
+@keyframes fadeIn {
+    from { opacity: 0; }
+    to { opacity: 1; }
+}
+
+/* Karty - Obecný styl kontejnerů */
+.card {
+    background-color: var(--color-white);
+    border-radius: var(--border-radius);
+    padding: 1.5rem;
+    margin-bottom: 1.5rem;
+    box-shadow: var(--shadow-medium);
+}
+
+/* Formulářové prvky */
+.form-group {
     margin-bottom: 1rem;
 }
 
 label {
     display: block;
-    margin-bottom: 0.5rem;
-    font-weight: 600;
-    color: var(--dark-gray);
-    font-size: 0.9em;
-}
-
-label i {
-    margin-right: 6px;
-    color: var(--primary-color);
-    width: 1.1em;
-    display: inline-block; /* Pro konzistentní odsazení */
-}
-
-/* --- Navigace --- */
-nav {
-    display: flex;
-    justify-content: center;
-    flex-wrap: wrap;
-    margin-bottom: 30px;
-    background-color: transparent; /* Průhledné pozadí */
-    padding: 0;
-    border-bottom: 1px solid var(--medium-gray);
-    padding-bottom: 15px;
-}
-
-nav button {
-    background-color: var(--white);
-    color: var(--primary-color); /* Zelený text */
-    border: 1px solid var(--medium-gray);
-    padding: 10px 20px;
-    margin: 5px;
-    cursor: pointer;
-    border-radius: var(--border-radius);
-    transition: all 0.2s ease-in-out;
-    font-size: 0.95em;
+    margin-bottom: 0.3rem;
     font-weight: 500;
+    color: var(--color-text-light);
 }
-
-nav button:hover {
-    background-color: var(--light-gray);
-    border-color: var(--dark-gray);
-    color: var(--primary-color-dark);
-}
-
-nav button.active {
-    background-color: var(--primary-color);
-    color: var(--white);
-    border-color: var(--primary-color);
-    font-weight: 600;
-    box-shadow: var(--box-shadow);
-}
-
-nav button i {
-    margin-right: 8px;
-}
-
-/* --- Sekce --- */
-.section {
-    display: none;
-    padding: 25px 0; /* Vertikální padding, bez horizontálního (řeší kontejner) */
-    margin-top: 25px;
-    border-top: 1px solid var(--medium-gray); /* Oddělení sekcí horní linkou */
-}
-.section:first-of-type {
-    border-top: none; /* První sekce nemá horní linku */
-     margin-top: 0;
-}
-
-
-.section.active {
-    display: block;
-}
-
-/* --- Přehled (Summary) --- */
-.summary {
-    display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
-    gap: 25px;
-    margin-bottom: 30px;
-}
-
-.summary-box {
-    background: var(--white);
-    padding: 25px;
-    border-radius: var(--border-radius);
-    box-shadow: var(--box-shadow);
-    border: 1px solid var(--medium-gray);
-    border-top: 4px solid var(--primary-color); /* Barevný horní okraj */
-    text-align: left; /* Zarovnání doleva */
-}
-.summary-box.total-summary {
-    border-top-color: var(--secondary-color);
-}
-
-.summary-box h3 {
-    margin-bottom: 15px;
-    color: var(--text-color);
-    font-size: 1.3em;
-    font-weight: 700;
-}
-
-.summary-box p {
-    font-size: 1em;
-    margin-bottom: 8px;
-    color: var(--dark-gray); /* Mírně světlejší text */
-    display: flex; /* Pro zarovnání ikonky a textu */
-    align-items: center;
-}
-
-.summary-box span {
-    font-weight: 700; /* Tučnější hodnota */
-    color: var(--text-color); /* Hlavní barva textu pro hodnoty */
-    margin-left: auto; /* Odsadí hodnotu doprava */
-    padding-left: 10px; /* Malá mezera před hodnotou */
-}
-
-.summary-box i {
-    margin-right: 10px;
-    color: var(--primary-color);
-    width: 1.3em;
-    text-align: center;
-    font-size: 1.1em; /* Mírně větší ikonky */
-}
-.summary-box.total-summary i {
-    color: var(--secondary-color);
-}
-
-/* Přehled financí v sumáři */
-#finance-summary {
-    font-size: 0.9em;
-    color: var(--dark-gray);
-    margin-top: 5px;
-}
-
-
-/* --- Tlačítka Obecně --- */
-.button, button {
-    padding: 0.6rem 1.2rem; /* Větší padding */
-    border: 1px solid transparent; /* Transparentní okraj defaultně */
-    border-radius: var(--border-radius);
-    cursor: pointer;
-    font-size: 1em;
-    font-weight: 500; /* Střední váha písma */
-    transition: all 0.2s ease-in-out;
-    margin: 5px;
-    display: inline-flex;
-    align-items: center;
-    justify-content: center;
-    vertical-align: middle;
-    line-height: 1.5; /* Pro konzistentní výšku */
-    box-shadow: var(--box-shadow);
-}
-.button:hover {
-    transform: translateY(-2px); /* Mírný posun nahoru */
-    box-shadow: 0 0.25rem 0.5rem rgba(0,0,0,0.1);
-}
-.button:active {
-    transform: translateY(0);
-    box-shadow: var(--box-shadow);
-}
-
-.button i, button i {
-    margin-right: 8px;
-    font-size: 1.1em;
-}
-
-/* Barvy tlačítek */
-.button, .save-button, .filter-button { background-color: var(--primary-color); color: var(--white); border-color: var(--primary-color); }
-.button:hover, .save-button:hover, .filter-button:hover { background-color: var(--primary-color-dark); border-color: var(--primary-color-dark); }
-
-.cancel-button { background-color: #6c757d; color: var(--white); border-color: #6c757d; } /* Šedá pro zrušit */
-.cancel-button:hover { background-color: #5a6268; border-color: #545b62; }
-
-.danger-button { background-color: var(--danger-color); color: var(--white); border-color: var(--danger-color); }
-.danger-button:hover { background-color: var(--danger-color-dark); border-color: var(--danger-color-dark); }
-
-.export-button { background-color: var(--info-color); color: var(--white); border-color: var(--info-color); }
-.export-button:hover { background-color: var(--info-color-dark); border-color: var(--info-color-dark); }
-
-.sync-button { background-color: var(--secondary-color); color: var(--dark-gray); border-color: var(--secondary-color); }
-.sync-button:hover { background-color: var(--secondary-color-dark); border-color: var(--secondary-color-dark); }
-
-/* Tlačítka časovače */
-.timer-button { font-size: 1.05em; padding: 0.7rem 1.4rem; }
-.timer-button.start { background-color: var(--primary-color); border-color: var(--primary-color); }
-.timer-button.start:hover { background-color: var(--primary-color-dark); border-color: var(--primary-color-dark); }
-.timer-button.pause { background-color: var(--secondary-color); border-color: var(--secondary-color); color: var(--dark-gray); }
-.timer-button.pause:hover { background-color: var(--secondary-color-dark); border-color: var(--secondary-color-dark); }
-.timer-button.stop { background-color: var(--danger-color); border-color: var(--danger-color); }
-.timer-button.stop:hover { background-color: var(--danger-color-dark); border-color: var(--danger-color-dark); }
-
-/* Ostatní specifická tlačítka */
-.delete-button { /* Tlačítko pro smazání v tabulce */
-    background: none; border: none; box-shadow: none;
-    color: var(--danger-color); font-size: 1.3em; padding: 5px;
-}
-.delete-button:hover { color: var(--danger-color-dark); background-color: rgba(220, 53, 69, 0.1); transform: translateY(0); }
-
-.delete-category-button { /* Smazání kategorie */
-     background: none; border: none; box-shadow: none;
-     color: var(--danger-color); font-size: 1em; padding: 0 5px;
-}
-.delete-category-button:hover { color: var(--danger-color-dark); transform: translateY(0); }
-
-.entry-mode-toggle .button { /* Přepínání režimů */
-    background-color: var(--light-gray);
-    color: var(--dark-gray);
-    border: 1px solid var(--medium-gray);
-    box-shadow: none;
-    font-weight: 600;
-}
-.entry-mode-toggle .button:hover {
-    background-color: var(--medium-gray);
-}
-
-
-/* --- Formuláře --- */
-.entry-mode-toggle { margin-bottom: 25px; text-align: center; }
-
-.entry-mode {
-    background: var(--white);
-    padding: 25px 30px;
-    border: 1px solid var(--medium-gray);
-    border-radius: var(--border-radius);
-    margin-top: 20px;
-    box-shadow: var(--box-shadow);
-}
-.entry-mode h3 {
-    text-align: center;
-    margin-bottom: 1.5rem;
-    font-weight: 600;
-}
-
-.entry-mode.hidden, .hidden { display: none; }
-
-.form-grid {
-    display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
-    gap: 20px 25px; /* Větší mezery */
-    margin-bottom: 25px;
-}
-
-.form-grid div { display: flex; flex-direction: column; }
-.form-grid .full-width { grid-column: 1 / -1; }
 
 input[type="text"],
 input[type="number"],
-input[type="time"],
 input[type="date"],
 input[type="month"],
-select,
-textarea /* Přidáno pro případné budoucí použití */
- {
+select {
     width: 100%;
-    padding: 0.6rem 0.8rem; /* Upravený padding */
-    border: 1px solid var(--medium-gray);
+    padding: 0.75rem;
+    border: 1px solid var(--color-border);
     border-radius: var(--border-radius);
-    font-size: 1em;
-    background-color: var(--white);
-    color: var(--text-color);
-    transition: border-color 0.15s ease-in-out, box-shadow 0.15s ease-in-out;
-    line-height: 1.5; /* Pro konzistentní výšku */
-}
-input::placeholder, textarea::placeholder {
-    color: #aab0b6; /* Světlejší placeholder */
-    opacity: 1;
+    font-family: inherit;
+    font-size: 1rem;
+    transition: border-color 0.2s ease-in-out;
 }
 
-input:read-only { background-color: var(--light-gray); cursor: not-allowed; }
-
-input:focus, select:focus, textarea:focus {
+input:focus, select:focus {
     outline: none;
-    border-color: var(--primary-color);
-    box-shadow: 0 0 0 0.2rem rgba(40, 167, 69, 0.25); /* Zelený focus stín */
+    border-color: var(--color-primary);
+    box-shadow: 0 0 0 2px rgba(162, 210, 255, 0.5); /* Světle modrá záře */
 }
 
-.custom-category-input { margin-top: 8px; }
-
-.form-actions {
-    text-align: right;
-    margin-top: 25px;
-    padding-top: 20px;
-    border-top: 1px solid var(--medium-gray);
-}
-
-/* --- Časovač --- */
-.timer-controls { text-align: center; margin: 30px 0; }
-.timer-button { margin: 0 10px; }
-
-#timer-display {
-    font-size: 3em;
-    text-align: center;
-    margin: 25px 0;
-    color: var(--text-color);
-    font-weight: 700;
-    background-color: var(--light-gray);
-    padding: 20px 15px;
+button {
+    background-color: var(--color-primary);
+    color: var(--color-white);
+    border: none;
+    padding: 0.75rem 1.5rem;
     border-radius: var(--border-radius);
-    font-family: 'Courier New', Courier, monospace;
-    border: 1px solid var(--medium-gray);
-}
-
-.timer-summary {
-    margin-top: 25px;
-    padding: 25px;
-    background: rgba(40, 167, 69, 0.05); /* Velmi světlé zelené pozadí */
-    border-radius: var(--border-radius);
-    border: 1px solid rgba(40, 167, 69, 0.2); /* Jemný zelený okraj */
-}
-.timer-summary h4 { text-align: center; color: var(--primary-color); margin-bottom: 20px; font-size: 1.2em;}
-#timer-earnings {
-     font-weight: 700;
-     color: var(--primary-color);
-     display: block; /* Celý řádek */
-     padding: 0.6rem 0; /* Zarovnání s inputy */
-     font-size: 1.1em;
-     text-align: right; /* Výdělek zarovnat doprava */
-}
-.timer-summary .form-grid > div:has(#timer-earnings) {
-    flex-direction: row; /* Popisek a hodnota vedle sebe */
+    cursor: pointer;
+    font-family: var(--font-primary);
+    font-size: 1rem;
+    font-weight: 600;
+    transition: background-color 0.2s ease-in-out, transform 0.1s ease;
+    display: inline-flex;
     align-items: center;
-    justify-content: flex-end; /* Zarovnat doprava */
-}
-.timer-summary .form-grid > div:has(#timer-earnings) label {
-     margin-bottom: 0; /* Odebrat spodní margin labelu */
-     margin-right: 10px;
+    gap: 0.5rem;
 }
 
+button:hover {
+    background-color: #8ecae6; /* Tmavší modrá */
+}
 
-/* --- Tabulky --- */
-.table-container {
-    overflow-x: auto;
-    margin-top: 25px;
-    border: 1px solid var(--medium-gray);
+button:active {
+     transform: scale(0.98);
+}
+
+button:disabled {
+    background-color: #ccc;
+    cursor: not-allowed;
+}
+
+button i {
+    font-size: 0.9em;
+}
+
+.danger-btn {
+    background-color: var(--color-danger);
+}
+.danger-btn:hover {
+    background-color: #d00000;
+}
+
+/* Filtry */
+.filters {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 1rem;
+    margin-bottom: 1rem;
+    padding: 0.5rem;
+    background-color: #f0f0f0; /* Lehké pozadí pro oddělení */
     border-radius: var(--border-radius);
-    box-shadow: var(--box-shadow);
+}
+.filters label {
+    margin-bottom: 0;
+    font-size: 0.9rem;
+}
+.filters select, .filters input {
+     padding: 0.4rem 0.6rem;
+     font-size: 0.9rem;
+     width: auto; /* Zmenšit šířku */
+     flex-grow: 1; /* Flexibilní růst */
+}
+.filters button {
+    padding: 0.4rem 0.8rem;
+    font-size: 0.9rem;
+     background-color: var(--color-text-light);
+}
+.filters button:hover {
+    background-color: #777;
+}
+
+
+/* Tabulky */
+.table-wrapper {
+    overflow-x: auto; /* Umožní horizontální posun na mobilech */
+    width: 100%;
 }
 
 table {
     width: 100%;
     border-collapse: collapse;
-    background-color: var(--white);
+    margin-top: 1rem;
 }
 
 th, td {
-    padding: 0.9rem 1rem; /* Větší padding */
+    padding: 0.75rem;
     text-align: left;
-    vertical-align: middle;
-    border-bottom: 1px solid var(--medium-gray);
-    white-space: nowrap;
+    border-bottom: 1px solid var(--color-border);
+    font-size: 0.95rem;
+    white-space: nowrap; /* Zabraňuje lámání textu v buňkách */
 }
 
 th {
-    background-color: var(--light-gray); /* Světle šedé pozadí záhlaví */
-    color: var(--dark-gray);
+    background-color: #e9ecef;
     font-weight: 600;
-    font-size: 0.85em;
-    text-transform: uppercase;
-    letter-spacing: 0.5px;
-    border-bottom-width: 2px; /* Silnější linka pod záhlavím */
-    border-color: var(--medium-gray);
+    color: var(--color-text-light);
 }
 
-tbody tr:last-child td { border-bottom: none; } /* Poslední řádek bez linky */
-
-tbody tr:nth-child(even) { background-color: rgba(0,0,0,0.02); } /* Velmi jemné pruhování */
-
-tbody tr:hover { background-color: rgba(40, 167, 69, 0.08); } /* Zelenkavý hover */
-
-td:last-child { text-align: right; } /* Akce doprava */
-td .action-buttons { display: flex; justify-content: flex-end; gap: 10px; }
-
-/* Stylování částek v tabulce financí */
-.positive-amount { color: #218838; font-weight: 600; } /* Tmavší zelená */
-.negative-amount { color: var(--danger-color); font-weight: 600; }
-
-
-/* --- Filtry --- */
-.filters {
-    display: flex;
-    flex-wrap: wrap;
-    gap: 15px 20px;
-    align-items: flex-end; /* Zarovnání prvků dolů */
-    padding: 20px;
-    background-color: var(--white);
-    border-radius: var(--border-radius);
-    margin-bottom: 25px;
-    border: 1px solid var(--medium-gray);
-    box-shadow: var(--box-shadow);
+tbody tr:hover {
+    background-color: #f1f1f1;
 }
-.filters > div { /* Obal pro label a input/select */
-    display: flex;
-    flex-direction: column;
-    flex-grow: 1; /* Roztáhne se */
-    min-width: 150px; /* Minimální šířka */
+
+tfoot {
+    font-weight: bold;
 }
-.filters label { margin-bottom: 0.3rem; }
-.filters select, .filters input { padding: 0.5rem 0.7rem; font-size: 0.95em; }
-.filters .button { align-self: flex-end; /* Tlačítka zarovnat k dolnímu okraji */ }
-
-
-/* --- Notifikace --- */
-.notification {
-    position: fixed;
-    bottom: 25px;
-    left: 50%;
-    transform: translateX(-50%) translateY(10px); /* Startovní pozice níže */
-    background-color: rgba(33, 37, 41, 0.9); /* Tmavě šedá */
-    color: var(--white);
-    padding: 15px 30px;
-    border-radius: var(--border-radius);
-    z-index: 1050; /* Vyšší z-index */
-    opacity: 0;
-    transition: opacity 0.3s ease, transform 0.3s ease;
-    font-size: 1em;
-    box-shadow: 0 0.5rem 1rem rgba(0, 0, 0, 0.2);
-    visibility: hidden;
-    min-width: 250px; /* Minimální šířka */
+tfoot td {
+     background-color: #e9ecef;
+     border-top: 2px solid var(--color-primary);
+}
+tfoot .summary-header {
     text-align: center;
+    background-color: #d1e7ff;
+    color: var(--color-primary);
+    font-weight: 600;
 }
 
-.notification.show {
-    opacity: 1;
-    transform: translateX(-50%) translateY(0);
-    visibility: visible;
+
+/* Specifické styly pro sekce */
+
+/* Výkazy - Timer */
+.timer-container {
+    text-align: center;
+    background-color: var(--color-tertiary); /* Martyho barva */
+}
+.timer-display {
+    font-size: 3rem;
+    font-weight: 600;
+    color: var(--color-primary);
+    margin-bottom: 1rem;
+    font-family: 'Courier New', Courier, monospace; /* Monospace pro čísla */
+}
+.timer-user-select {
+    margin-bottom: 1rem;
+}
+.timer-controls button {
+    margin: 0 0.5rem;
+}
+.timer-output-display {
+    margin-top: 1rem;
+    font-size: 0.9rem;
+    color: var(--color-text-light);
+}
+#timer-output span {
+    display: block; /* Každý údaj na nový řádek */
+    margin-bottom: 0.3rem;
 }
 
-.notification.error { background-color: rgba(220, 53, 69, 0.9); } /* Červená pro chybu */
-.notification.warning { background-color: rgba(255, 193, 7, 0.9); color: var(--dark-gray); }
-.notification.info { background-color: rgba(23, 162, 184, 0.9); } /* Modrá pro info */
-.notification.success { background-color: rgba(40, 167, 69, 0.9); } /* Zelená pro úspěch */
 
-
-/* --- Nastavení --- */
-.settings-group {
-    margin-bottom: 35px;
-    padding-bottom: 25px;
-    border-bottom: 1px solid var(--medium-gray);
+/* Výkazy - Barvy dle osob (Příklad) */
+#worklog-table tbody tr[data-user="Maru"] td:first-child {
+    background-color: var(--color-secondary); /* Růžová */
+    color: var(--color-white);
+    font-weight: bold;
 }
-.settings-group:last-child { border-bottom: none; }
-.settings-group h3 { color: var(--text-color); margin-bottom: 1.2rem; font-size: 1.3em; }
-
-.settings-group .form-grid { /* Můžeme použít stejný grid */
-    gap: 15px 20px;
+#worklog-table tbody tr[data-user="Marty"] td:first-child {
+    background-color: var(--color-tertiary); /* Tyrkysová */
+     color: var(--color-text);
+     font-weight: bold;
 }
-.settings-group input[type="number"],
-.settings-group input[type="text"] { max-width: 350px; }
 
-/* Stylování labelu pro import jako tlačítka */
-.settings-group label[for="import-data-file"] {
-    display: inline-flex; /* Aby fungovalo jako tlačítko */
-    padding: 0.6rem 1.2rem; border-radius: var(--border-radius); cursor: pointer;
-    background-color: var(--secondary-color); color: var(--dark-gray); border: 1px solid var(--secondary-color);
-    transition: all 0.2s ease-in-out; margin: 5px; font-size: 1em; font-weight: 500;
-    box-shadow: var(--box-shadow); align-items: center;
+/* Finance - Barvy příjmů/výdajů */
+#finance-table tbody tr[data-type="income"] td:nth-child(5) { /* Částka */
+    color: var(--color-success);
+    font-weight: bold;
 }
-.settings-group label[for="import-data-file"]:hover { background-color: var(--secondary-color-dark); border-color: var(--secondary-color-dark); transform: translateY(-2px); box-shadow: 0 0.25rem 0.5rem rgba(0,0,0,0.1); }
-.settings-group #import-data-file { display: none; }
+#finance-table tbody tr[data-type="expense"] td:nth-child(5) { /* Částka */
+    color: var(--color-danger);
+    font-weight: bold;
+}
 
+/* Dluhy */
+.rent-info p { margin-bottom: 0.5rem;}
+.rent-info span { font-weight: bold; }
 
+#debt-table tbody td:last-child button { /* Tlačítko Splatit */
+    background-color: var(--color-success);
+    margin-right: 5px;
+}
+#debt-table tbody td:last-child button:hover {
+    background-color: #8bc34a;
+}
+#debt-table tbody td:last-child button.delete-btn {
+     background-color: var(--color-warning);
+}
+#debt-table tbody td:last-child button.delete-btn:hover {
+     background-color: #e0ac69;
+}
+
+/* Nastavení */
 #category-list {
-    list-style: none; padding: 0; margin-top: 15px; max-width: 450px;
+    list-style: none;
+    padding-left: 0;
+    margin-top: 1rem;
 }
 #category-list li {
-    background: var(--light-gray);
-    padding: 10px 15px; margin-bottom: 8px; border-radius: var(--border-radius);
-    display: flex; justify-content: space-between; align-items: center;
-    font-size: 0.95em; border: 1px solid var(--medium-gray);
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 0.5rem;
+    border-bottom: 1px dashed var(--color-border);
 }
-#category-list li[title]:hover { cursor: help; }
-
-
-/* --- Responzivní Design --- */
-@media (max-width: 992px) {
-     .container { max-width: 960px; padding: 25px 30px; }
-     .form-grid { grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); }
-     h1 { font-size: 2em; } h2 { font-size: 1.6em; } h3 { font-size: 1.3em; }
+#category-list button {
+    background-color: var(--color-warning);
+    padding: 0.3rem 0.6rem;
+    font-size: 0.8rem;
 }
-
-@media (max-width: 768px) {
-    body { padding: 10px; font-size: 15px; }
-    .container { padding: 20px; margin: 10px auto; }
-    h1 { font-size: 1.8em; } h2 { font-size: 1.5em; } h3 { font-size: 1.2em; }
-
-    .form-grid { grid-template-columns: 1fr; gap: 15px; } /* Vše pod sebou */
-
-    nav { justify-content: flex-start; padding-bottom: 10px; } /* Zarovnat doleva, menší padding */
-    nav button { padding: 8px 15px; font-size: 0.9em; }
-
-    .filters { flex-direction: column; align-items: stretch; padding: 15px; }
-    .filters > div { min-width: unset; } /* Zrušit min-width na mobilu */
-    .filters .button { margin-top: 10px; }
-
-    .summary { grid-template-columns: 1fr; gap: 15px; } /* Pod sebou */
-    .summary-box { padding: 20px; }
-
-    th, td { padding: 0.7rem 0.8rem; white-space: normal; } /* Povolit zalamování */
-    td:last-child { text-align: left; } /* Akce doleva */
-
-    .settings-group input[type="number"],
-    .settings-group input[type="text"] { max-width: none; }
-    #category-list { max-width: none; }
-    #timer-display { font-size: 2.5em; padding: 15px 10px; }
-    .timer-controls { margin: 20px 0; }
-    .timer-button { padding: 0.6rem 1.2rem; margin: 0 5px; }
+#category-list button:hover {
+     background-color: #e0ac69;
 }
 
-@media (max-width: 480px) {
-    .container { padding: 15px; }
-    h1 { font-size: 1.6em; } h2 { font-size: 1.3em; } h3 { font-size: 1.1em; }
-    .button, button { padding: 0.5rem 1rem; font-size: 0.95em; }
-    nav button { padding: 8px 12px; font-size: 0.85em; }
-    th, td { font-size: 0.9em; padding: 0.6rem 0.5rem; }
-    #timer-display { font-size: 2em; }
-    .notification { width: 95%; bottom: 10px; padding: 12px 20px; }
+/* Spodní navigace */
+#bottom-nav {
+    position: fixed;
+    bottom: 0;
+    left: 0;
+    width: 100%;
+    background-color: var(--color-white);
+    display: flex;
+    justify-content: space-around;
+    box-shadow: 0 -2px 5px var(--color-shadow);
+    z-index: 1000;
+}
+
+.nav-btn {
+    background: none;
+    border: none;
+    color: var(--color-text-light);
+    padding: 0.8rem 0.5rem; /* Menší padding vertikálně */
+    font-size: 0.75rem; /* Menší písmo pro text */
+    cursor: pointer;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    flex-grow: 1; /* Rovnoměrné rozložení */
+    transition: color 0.2s ease-in-out;
+}
+
+.nav-btn i {
+    font-size: 1.4rem; /* Větší ikony */
+    margin-bottom: 0.2rem;
+}
+
+.nav-btn.active {
+    color: var(--color-primary);
+    font-weight: bold;
+}
+
+/* Responzivita */
+@media (min-width: 768px) {
+    body {
+        padding-bottom: 0; /* Odebrat padding pro spodní nav */
+         display: flex; /* Layout se sidebarem */
+    }
+
+    #bottom-nav { /* Přesunout nav doleva jako sidebar */
+        position: fixed; /* Změna na fixed pro zachování pozice */
+        left: 0;
+        top: 0;
+        bottom: 0; /* Roztáhnout na celou výšku */
+        width: 220px; /* Šířka sidebaru */
+        flex-direction: column;
+        justify-content: flex-start; /* Zarovnání nahoru */
+        padding-top: 60px; /* Prostor pod headerem (pokud by byl) */
+        box-shadow: 2px 0 5px var(--color-shadow); /* Stín na pravé straně */
+        background-color: #f8f9fa; /* Jiné pozadí pro sidebar */
+    }
+
+    .nav-btn {
+        flex-direction: row; /* Ikona a text vedle sebe */
+        justify-content: flex-start; /* Zarovnání doleva */
+        padding: 1rem 1.5rem;
+        font-size: 1rem;
+        width: 100%;
+        text-align: left;
+        gap: 1rem; /* Mezera mezi ikonou a textem */
+    }
+
+     .nav-btn i {
+         font-size: 1.2rem;
+         margin-bottom: 0;
+     }
+
+    .nav-btn.active {
+        background-color: var(--color-primary);
+        color: var(--color-white);
+        border-radius: 0 var(--border-radius) var(--border-radius) 0; /* Zaoblení jen vpravo */
+    }
+     .nav-btn.active i {
+         color: var(--color-white); /* Bílá ikona v aktivním stavu */
+     }
+
+
+    header {
+        display: none; /* Skrýt horní header na desktopu (název je v sidebaru) */
+        /* Nebo ho ponechat a upravit layout */
+        /* position: fixed; */
+        /* top: 0; */
+        /* left: 220px; */
+        /* right: 0; */
+        /* z-index: 999; */
+    }
+
+    main {
+        margin-left: 220px; /* Posunout hlavní obsah doprava o šířku sidebaru */
+        padding: 2rem;
+        width: calc(100% - 220px); /* Zajistit správnou šířku */
+    }
+
+    /* Větší rozestupy pro karty */
+    .card {
+        padding: 2rem;
+    }
+
+    /* Možné úpravy layoutu sekcí, např. vedle sebe */
+    /* .some-section { display: grid; grid-template-columns: 1fr 1fr; gap: 2rem; } */
 }
