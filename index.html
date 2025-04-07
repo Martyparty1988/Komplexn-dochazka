@@ -7,22 +7,25 @@
     <link rel="manifest" href="manifest.json">
     <link rel="stylesheet" href="style.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-b3/css/all.min.css" integrity="sha512-Fo3rlrZj/k7ujTnHg4CGR2D7kSs0v4LLanw2qksYuRlEzO+tcaEPQogQ0KaoGN26/zrn20ImR1DfuLWnOo7aBA==" crossorigin="anonymous" referrerpolicy="no-referrer" />
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600&display=swap" rel="stylesheet">
 </head>
 <body>
     <header>
         <h1>Pracovní výkazy & Finance</h1>
         <nav>
             <ul>
-                <li><a href="#vyskazy"><i class="fas fa-clock"></i> Pracovní výkazy</a></li>
-                <li><a href="#finance"><i class="fas fa-coins"></i> Finance</a></li>
-                <li><a href="#dluhy"><i class="fas fa-file-invoice-dollar"></i> Dluhy a splátky</a></li>
-                <li><a href="#nastaveni"><i class="fas fa-cog"></i> Nastavení</a></li>
+                <li><a href="#vyskazy" data-section="vyskazy"><i class="fas fa-clock"></i> Pracovní výkazy</a></li>
+                <li><a href="#finance" data-section="finance"><i class="fas fa-coins"></i> Finance</a></li>
+                <li><a href="#dluhy" data-section="dluhy"><i class="fas fa-file-invoice-dollar"></i> Dluhy a splátky</a></li>
+                <li><a href="#nastaveni" data-section="nastaveni"><i class="fas fa-cog"></i> Nastavení</a></li>
             </ul>
         </nav>
     </header>
 
     <main>
-        <section id="vyskazy" class="section">
+        <section id="vyskazy" class="section active">
             <h2>Pracovní výkazy</h2>
             <div id="timer">
                 <span id="timer-person"></span>
@@ -47,20 +50,22 @@
             </div>
             <div id="work-logs">
                 <h3>Přehled výkazů</h3>
-                <table>
-                    <thead>
-                        <tr>
-                            <th>Osoba</th>
-                            <th>Datum</th>
-                            <th>Začátek</th>
-                            <th>Konec</th>
-                            <th>Pauza</th>
-                            <th>Odpracováno</th>
-                            <th>Výdělek</th>
-                        </tr>
-                    </thead>
-                    <tbody id="work-logs-table"></tbody>
-                </table>
+                <div class="table-responsive">
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>Osoba</th>
+                                <th>Datum</th>
+                                <th>Začátek</th>
+                                <th>Konec</th>
+                                <th>Pauza</th>
+                                <th>Odpracováno</th>
+                                <th>Výdělek</th>
+                            </tr>
+                        </thead>
+                        <tbody id="work-logs-table"></tbody>
+                    </table>
+                </div>
             </div>
         </section>
 
@@ -86,18 +91,20 @@
             </div>
             <div id="financial-transactions">
                 <h3>Přehled financí</h3>
-                <table>
-                    <thead>
-                        <tr>
-                            <th>Typ</th>
-                            <th>Popis</th>
-                            <th>Částka</th>
-                            <th>Měna</th>
-                            <th>Datum</th>
-                        </tr>
-                    </thead>
-                    <tbody id="finance-table"></tbody>
-                </table>
+                <div class="table-responsive">
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>Typ</th>
+                                <th>Popis</th>
+                                <th>Částka</th>
+                                <th>Měna</th>
+                                <th>Datum</th>
+                            </tr>
+                        </thead>
+                        <tbody id="finance-table"></tbody>
+                    </table>
+                </div>
             </div>
         </section>
 
