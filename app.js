@@ -1,243 +1,445 @@
-const CACHE_NAME = 'pracovni-vykazy-cache-v1.1'; // Zvýšená verze cache při změnách
-const DATA_CACHE_NAME = 'pracovni-vykazy-data-cache-v1'; // Samostatná cache pro data (pro případné odlišné strategie)
+document.addEventListener('DOMContentLoaded', () => {
+    const timerTimeDisplay = document.getElementById('timer-time');
+    const timerStartButton = document.getElementById('timer-start');
+    const timerPauseButton = document.getElementById('timer-pause');
+    const timerStopButton = document.getElementById('timer-stop');
+    const timerPersonDisplay = document.getElementById('timer-person');
 
-// Soubory k okamžitému cachování (základ aplikace)
-const FILES_TO_CACHE = [
-    '/', // Kořenový adresář (často mapován na index.html)
-    '/index.html',
-    '/app.js',
-    '/style.css',
-    '/manifest.json',
-    '/icons/icon-192x192.png',
-    '/icons/icon-512x512.png',
-    '/icons/favicon.ico',
-    'https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css',
-    // Přidejte fonty, pokud je FontAwesome stahuje samostatně (často woff2 soubory)
-    // Příklad: 'https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/webfonts/fa-solid-900.woff2'
-];
+    const manualEntryForm = document.getElementById('manual-entry-form');
+    const workLogsTableBody = document.getElementById('work-logs-table');
 
-// --- Instalace Service Workera ---
-self.addEventListener('install', (evt) => {
-    console.log('[ServiceWorker] Instaluji...');
-    evt.waitUntil(
-        caches.open(CACHE_NAME).then((cache) => {
-            console.log('[ServiceWorker] Cachuji základní soubory aplikace.');
-            return cache.addAll(FILES_TO_CACHE);
-        }).catch(err => {
-            console.error('[ServiceWorker] Chyba při cachování základních souborů:', err);
-        })
-    );
-    self.skipWaiting(); // Aktivuje nového SW ihned po instalaci
-});
+    const financeForm = document.getElementById('finance-form');
+    const financeTableBody = document.getElementById('finance-table');
 
-// --- Aktivace Service Workera ---
-self.addEventListener('activate', (evt) => {
-    console.log('[ServiceWorker] Aktivuji...');
-    // Odstranění starých verzí cache
-    evt.waitUntil(
-        caches.keys().then((keyList) => {
-            return Promise.all(keyList.map((key) => {
-                if (key !== CACHE_NAME && key !== DATA_CACHE_NAME) { // Ponecháme aktuální aplikační a datovou cache
-                    console.log('[ServiceWorker] Odstraňuji starou cache:', key);
-                    return caches.delete(key);
-                }
-            }));
-        })
-    );
-    // Převezme kontrolu nad otevřenými stránkami ihned
-    self.clients.claim();
-    console.log('[ServiceWorker] Aktivace dokončena.');
-});
+    const debtForm = document.getElementById('debt-form');
+    const paymentForm = document.getElementById('payment-form');
+    const debtsListDiv = document.getElementById('debts-list');
 
-// --- Zachytávání Fetch požadavků ---
-self.addEventListener('fetch', (evt) => {
-    // Ignorujeme požadavky, které nejsou GET (např. POST na Firebase)
-    if (evt.request.method !== 'GET') {
-         // console.log('[ServiceWorker] Ignoruji non-GET požadavek:', evt.request.method, evt.request.url);
-        return;
-    }
+    const taskCategoriesList = document.getElementById('task-categories-list');
+    const addTaskCategoryButton = document.getElementById('add-task-category');
+    const newTaskCategoryInput = document.getElementById('new-task-category');
+    const expenseCategoriesList = document.getElementById('expense-categories-list');
+    const addExpenseCategoryButton = document.getElementById('add-expense-category');
+    const newExpenseCategoryInput = document.getElementById('new-expense-category');
 
-     // Ignorujeme Chrome extension požadavky
-     if (evt.request.url.startsWith('chrome-extension://')) {
-        return;
-     }
+    const rentAmountInput = document.getElementById('rent-amount');
+    const rentDayInput = document.getElementById('rent-day');
+    const saveRentSettingsButton = document.getElementById('save-rent-settings');
 
-    // Strategie pro API/Firebase požadavky (Network first, fallback to cache)
-    // Můžeme specificky cílit na URL databáze, pokud je to potřeba
-     if (evt.request.url.includes('firebaseio.com')) { // Nebo konkrétnější URL vaší databáze
-        // console.log('[ServiceWorker] Zpracovávám Firebase požadavek (Network first):', evt.request.url);
-        evt.respondWith(
-            caches.open(DATA_CACHE_NAME).then(cache => {
-                return fetch(evt.request)
-                    .then(response => {
-                        // Pokud úspěšně načteno z networku, uložíme do datové cache
-                        if (response && response.status === 200) {
-                           // console.log('[ServiceWorker] Cachuji Firebase odpověď:', evt.request.url);
-                           cache.put(evt.request.url, response.clone());
-                        }
-                        return response;
-                    }).catch(err => {
-                        // Pokud network selže, zkusíme vrátit z datové cache
-                        console.log('[ServiceWorker] Network pro Firebase selhal, zkouším cache:', err);
-                        return cache.match(evt.request);
-                    });
-            })
-        );
-        return; // Ukončíme zpracování pro Firebase
-    }
+    const exportWorkLogsButton = document.getElementById('export-work-logs');
+    const exportFinanceButton = document.getElementById('export-finance');
+    const exportDebtsButton = document.getElementById('export-debts');
 
-    // Strategie pro ostatní (aplikační) soubory (Cache first, fallback to network)
-   // console.log('[ServiceWorker] Zpracovávám aplikační požadavek (Cache first):', evt.request.url);
-    evt.respondWith(
-        caches.match(evt.request).then((cachedResponse) => {
-            if (cachedResponse) {
-               // console.log('[ServiceWorker] Vracím z cache:', evt.request.url);
-                return cachedResponse; // Vrátíme z cache, pokud existuje
-            }
+    let timerInterval;
+    let startTime;
+    let pauseTime;
+    let runningTime = 0;
+    let isRunning = false;
+    let currentPerson = 'maru'; // Default person for timer
 
-           // console.log('[ServiceWorker] Není v cache, načítám z networku:', evt.request.url);
-            // Pokud není v cache, načteme z networku
-            return fetch(evt.request).then((response) => {
-                // Cachujeme pouze platné odpovědi
-                if (!response || response.status !== 200 || response.type !== 'basic' || !FILES_TO_CACHE.includes(new URL(evt.request.url).pathname)) {
-                   // console.log('[ServiceWorker] Odpověď není cachovatelná nebo není v seznamu FILES_TO_CACHE:', evt.request.url, response.status, response.type);
-                    return response;
-                }
+    const hourlyRates = {
+        maru: 275,
+        marty: 400
+    };
 
-                // Klonujeme odpověď, protože ji potřebujeme pro cache i pro browser
-                const responseToCache = response.clone();
+    // --- Local Storage ---
+    const loadData = () => {
+        const workLogs = JSON.parse(localStorage.getItem('workLogs')) || [];
+        const finances = JSON.parse(localStorage.getItem('finances')) || [];
+        const debts = JSON.parse(localStorage.getItem('debts')) || [];
+        const rentSettings = JSON.parse(localStorage.getItem('rentSettings')) || { amount: 0, day: null };
+        const taskCategories = JSON.parse(localStorage.getItem('taskCategories')) || [];
+        const expenseCategories = JSON.parse(localStorage.getItem('expenseCategories')) || [];
+        return { workLogs, finances, debts, rentSettings, taskCategories, expenseCategories };
+    };
 
-                caches.open(CACHE_NAME).then((cache) => {
-                    // console.log('[ServiceWorker] Cachuji nově načtený soubor:', evt.request.url);
-                    cache.put(evt.request, responseToCache);
-                });
+    const saveData = (data) => {
+        localStorage.setItem('workLogs', JSON.stringify(data.workLogs));
+        localStorage.setItem('finances', JSON.stringify(data.finances));
+        localStorage.setItem('debts', JSON.stringify(data.debts));
+        localStorage.setItem('rentSettings', JSON.stringify(data.rentSettings));
+        localStorage.setItem('taskCategories', JSON.stringify(data.taskCategories));
+        localStorage.setItem('expenseCategories', JSON.stringify(data.expenseCategories));
+    };
 
-                return response; // Vrátíme originální odpověď prohlížeči
-            }).catch(err => {
-                 console.error('[ServiceWorker] Chyba při fetch a cachování:', evt.request.url, err);
-                 // Zde bychom mohli vrátit nějakou fallback stránku/odpověď pro offline scénář
+    let { workLogs, finances, debts, rentSettings, taskCategories, expenseCategories } = loadData();
+
+    // --- Timer ---
+    const updateTimerDisplay = () => {
+        const totalSeconds = Math.floor(runningTime / 1000);
+        const hours = Math.floor(totalSeconds / 3600);
+        const minutes = Math.floor((totalSeconds % 3600) / 60);
+        const seconds = totalSeconds % 60;
+        timerTimeDisplay.textContent = `${String(hours).padStart(2, '0')}:${String(minutes).padStart(2, '0')}:${String(seconds).padStart(2, '0')}`;
+    };
+
+    const startTimer = () => {
+        if (!isRunning) {
+            isRunning = true;
+            startTime = Date.now() - runningTime;
+            timerInterval = setInterval(() => {
+                runningTime = Date.now() - startTime;
+                updateTimerDisplay();
+            }, 1000);
+            timerStartButton.disabled = true;
+            timerPauseButton.disabled = false;
+            timerStopButton.disabled = false;
+            timerPersonDisplay.textContent = currentPerson === 'maru' ? 'Maru' : 'Marty';
+        }
+    };
+
+    const pauseTimer = () => {
+        if (isRunning) {
+            isRunning = false;
+            clearInterval(timerInterval);
+            timerStartButton.disabled = false;
+            timerPauseButton.disabled = true;
+        }
+    };
+
+    const stopTimer = () => {
+        if (isRunning || runningTime > 0) {
+            isRunning = false;
+            clearInterval(timerInterval);
+            const endTime = new Date();
+            const durationInMinutes = Math.round(runningTime / (1000 * 60));
+            const startTimeObj = new Date(startTime);
+            const now = new Date(); // Current date for the work log
+            const dateString = `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}-${String(now.getDate()).padStart(2, '0')}`;
+
+            workLogs.push({
+                person: currentPerson,
+                date: dateString,
+                start: `${String(startTimeObj.getHours()).padStart(2, '0')}:${String(startTimeObj.getMinutes()).padStart(2, '0')}`,
+                end: `${String(endTime.getHours()).padStart(2, '0')}:${String(endTime.getMinutes()).padStart(2, '0')}`,
+                break: 0, // No break implemented in basic timer
+                worked: durationInMinutes,
+                earnings: (durationInMinutes / 60) * hourlyRates[currentPerson]
             });
-        })
-    );
-});
+            saveData({ workLogs, finances, debts, rentSettings, taskCategories, expenseCategories });
+            renderWorkLogs();
 
-
-// --- Background Sync Event ---
-self.addEventListener('sync', (evt) => {
-    if (evt.tag === 'sync-data') {
-        console.log('[ServiceWorker] Zachycen Background Sync event: sync-data');
-        evt.waitUntil(syncOfflineData());
-    }
-    // Zde mohou být další sync tagy pro jiné operace
-});
-
-// Funkce pro odeslání dat na server (volaná Background Syncem)
-async function syncOfflineData() {
-    console.log('[ServiceWorker] Pokouším se synchronizovat offline data...');
-    try {
-        // Přístup k IndexedDB nebo localStorage pro získání dat k odeslání
-        // V tomto případě použijeme localStorage, i když pro SW je lepší IndexedDB
-        // POZNÁMKA: Přímý přístup k localStorage ze SW nemusí být vždy spolehlivý.
-        // Robustnější řešení by bylo ukládat data určená k synchronizaci do IndexedDB z hlavní aplikace.
-
-        // Získání dat z "localStorage" pomocí clients API (asynchronní)
-        const clientList = await self.clients.matchAll({ includeUncontrolled: true, type: 'window' });
-        let localDataString = null;
-
-        if (clientList && clientList.length > 0) {
-            // Zkusíme získat data z prvního klienta (okna/tabu)
-             // Timeout pro případ, že by klient neodpověděl
-            const timeoutPromise = new Promise((_, reject) => setTimeout(() => reject(new Error("Timeout při získávání dat z klienta")), 2000));
-             try {
-                 localDataString = await Promise.race([
-                    new Promise(resolve => {
-                        clientList[0].postMessage({ command: 'getLocalStorageData', key: 'workReportData' });
-
-                        // Listener pro odpověď od klienta
-                         const messageListener = (event) => {
-                             if (event.data.command === 'localStorageDataResponse' && event.data.key === 'workReportData') {
-                                 self.removeEventListener('message', messageListener); // Odstranit listener
-                                 resolve(event.data.value);
-                             }
-                         };
-                        self.addEventListener('message', messageListener);
-                    }),
-                    timeoutPromise
-                 ]);
-                 console.log("[ServiceWorker] Data úspěšně získána z klienta.");
-             } catch(e) {
-                  console.warn("[ServiceWorker] Nepodařilo se získat data z aktivního klienta:", e.message);
-                  // Fallback: Pokud selže komunikace s klientem, pokusíme se data načíst přímo.
-                  // Toto je méně spolehlivé, ale může fungovat v některých případech.
-                  // Potřebujeme znát přesný klíč
-                 // localDataString = localStorage.getItem('workReportData'); // Přímý přístup - MŮŽE SELHAT
-             }
-
-        } else {
-            console.warn("[ServiceWorker] Žádný aktivní klient nenalezen pro získání dat.");
-             // Fallback: Přímý přístup k localStorage (méně spolehlivé)
-             // localDataString = localStorage.getItem('workReportData'); // MŮŽE SELHAT
+            runningTime = 0;
+            updateTimerDisplay();
+            timerStartButton.disabled = false;
+            timerPauseButton.disabled = true;
+            timerStopButton.disabled = true;
+            timerPersonDisplay.textContent = '';
         }
+    };
 
+    timerStartButton.addEventListener('click', startTimer);
+    timerPauseButton.addEventListener('click', pauseTimer);
+    timerStopButton.addEventListener('click', stopTimer);
 
-        if (!localDataString) {
-            console.log('[ServiceWorker] Nebyla nalezena žádná lokální data k synchronizaci.');
-            return; // Nic k synchronizaci
-        }
+    document.querySelectorAll('#timer-person-select input[type="radio"]').forEach(radio => {
+        radio.addEventListener('change', (event) => {
+            currentPerson = event.target.value;
+        });
+    });
 
-        const localData = JSON.parse(localDataString);
-        if (!localData) {
-             console.log('[ServiceWorker] Lokální data jsou prázdná nebo neplatná.');
+    // --- Manual Work Log Entry ---
+    manualEntryForm.addEventListener('submit', (e) => {
+        e.preventDefault();
+        const person = document.getElementById('manual-person').value;
+        const date = document.getElementById('manual-date').value;
+        const startTimeStr = document.getElementById('manual-start-time').value;
+        const endTimeStr = document.getElementById('manual-end-time').value;
+        const breakTime = parseInt(document.getElementById('manual-break-time').value) || 0;
+
+        const startParts = startTimeStr.split(':');
+        const endParts = endTimeStr.split(':');
+
+        if (startParts.length !== 2 || endParts.length !== 2 || isNaN(parseInt(startParts[0])) || isNaN(parseInt(startParts[1])) || isNaN(parseInt(endParts[0])) || isNaN(parseInt(endParts[1]))) {
+            alert('Neplatný formát času.');
             return;
         }
 
-        // !!! NAHRAĎTE SVOU FIREBASE URL !!!
-        const firebaseDbUrl = 'https://VASE_DATABASE_URL.firebaseio.com/appData.json';
+        const startHour = parseInt(startParts[0]);
+        const startMinute = parseInt(startParts[1]);
+        const endHour = parseInt(endParts[0]);
+        const endMinute = parseInt(endParts[1]);
 
-        console.log('[ServiceWorker] Odesílám data na:', firebaseDbUrl);
+        const startDate = new Date(`${date}T${String(startHour).padStart(2, '0')}:${String(startMinute).padStart(2, '0')}:00`);
+        const endDate = new Date(`${date}T${String(endHour).padStart(2, '0')}:${String(endMinute).padStart(2, '0')}:00`);
 
-        const response = await fetch(firebaseDbUrl, {
-            method: 'PUT', // POZOR: PUT přepíše všechna data na dané URL!
-            headers: {
-                'Content-Type': 'application/json',
-                'Accept': 'application/json'
-            },
-            body: JSON.stringify(localData) // Odesíláme celý objekt appData
-        });
-
-        if (response.ok) {
-            console.log('[ServiceWorker] Offline data úspěšně synchronizována s Firebase.');
-             // Můžeme poslat zprávu zpět do aplikace, že synchronizace proběhla
-             clientList.forEach(client => client.postMessage({ command: 'syncCompleted' }));
-        } else {
-            console.error('[ServiceWorker] Chyba při synchronizaci offline dat:', response.status, response.statusText);
-             // Pokud selže, Background Sync to zkusí později znovu automaticky.
-             // Můžeme zvážit logování chyby nebo upozornění uživatele.
-            throw new Error(`Server response: ${response.status} ${response.statusText}`); // Vyhodíme chybu, aby sync manažer věděl, že má opakovat
+        if (isNaN(startDate.getTime()) || isNaN(endDate.getTime()) || endDate <= startDate) {
+            alert('Neplatné datum nebo čas.');
+            return;
         }
 
-    } catch (error) {
-        console.error('[ServiceWorker] Celková chyba při syncOfflineData:', error);
-        // Zajistíme, že chyba je vyhozena, aby se sync mohl opakovat
-        throw error;
-    }
-}
+        const durationInMinutes = Math.round((endDate - startDate) / (1000 * 60)) - breakTime;
+        if (durationInMinutes <= 0) {
+            alert('Odpracovaný čas musí být kladný.');
+            return;
+        }
 
-// --- Listener pro zprávy z hlavní aplikace ---
-self.addEventListener('message', (event) => {
-    // console.log("[ServiceWorker] Přijata zpráva z klienta:", event.data);
-    if (event.data && event.data.command === 'getLocalStorageData') {
-        const key = event.data.key;
-         console.log(`[ServiceWorker] Klient požádal o data z localStorage, klíč: ${key}`);
-         // POZOR: Přímý přístup k localStorage ze SW je riskantní.
-         // Tento kód PŘEDPOKLÁDÁ, že SW má přístup, což nemusí být pravda.
-         try {
-            const value = localStorage.getItem(key);
-            // Odeslání dat zpět klientovi, který poslal zprávu
-            event.source.postMessage({ command: 'localStorageDataResponse', key: key, value: value });
-         } catch (e) {
-             console.error(`[ServiceWorker] Chyba při přímém přístupu k localStorage pro klíč ${key}:`, e);
-             event.source.postMessage({ command: 'localStorageDataResponse', key: key, value: null, error: e.message });
-         }
+        workLogs.push({
+            person,
+            date,
+            start: startTimeStr,
+            end: endTimeStr,
+            break: breakTime,
+            worked: durationInMinutes,
+            earnings: (durationInMinutes / 60) * hourlyRates[person]
+        });
+        saveData({ workLogs, finances, debts, rentSettings, taskCategories, expenseCategories });
+        renderWorkLogs();
+        manualEntryForm.reset();
+    });
+
+    const renderWorkLogs = () => {
+        workLogsTableBody.innerHTML = '';
+        workLogs.forEach(log => {
+            const row = workLogsTableBody.insertRow();
+            row.insertCell().textContent = log.person === 'maru' ? 'Maru' : 'Marty';
+            row.insertCell().textContent = log.date;
+            row.insertCell().textContent = log.start;
+            row.insertCell().textContent = log.end;
+            row.insertCell().textContent = log.break;
+            row.insertCell().textContent = `${Math.floor(log.worked / 60)}:${String(log.worked % 60).padStart(2, '0')}`;
+            row.insertCell().textContent = `${log.earnings.toFixed(2)} CZK`;
+        });
+    };
+
+    // --- Finance ---
+    financeForm.addEventListener('submit', (e) => {
+        e.preventDefault();
+        const type = document.getElementById('finance-type').value;
+        const description = document.getElementById('finance-description').value;
+        const amount = parseFloat(document.getElementById('finance-amount').value);
+        const currency = document.getElementById('finance-currency').value;
+        const date = document.getElementById('finance-date').value;
+
+        if (isNaN(amount)) {
+            alert('Neplatná částka.');
+            return;
+        }
+
+        finances.push({ type, description, amount, currency, date });
+        saveData({ workLogs, finances, debts, rentSettings, taskCategories, expenseCategories });
+        renderFinances();
+        financeForm.reset();
+    });
+
+    const renderFinances = () => {
+        financeTableBody.innerHTML = '';
+        finances.forEach(finance => {
+            const row = financeTableBody.insertRow();
+            row.insertCell().textContent = finance.type === 'income' ? 'Příjem' : 'Výdaj';
+            row.insertCell().textContent = finance.description;
+            row.insertCell().textContent = finance.amount;
+            row.insertCell().textContent = finance.currency;
+            row.insertCell().textContent = finance.date;
+        });
+    };
+
+    // --- Dluhy a splátky ---
+    debtForm.addEventListener('submit', (e) => {
+        e.preventDefault();
+        const person = document.getElementById('debt-person').value;
+        const description = document.getElementById('debt-description').value;
+        const amount = parseFloat(document.getElementById('debt-amount').value);
+        const currency = document.getElementById('debt-currency').value;
+
+        if (isNaN(amount)) {
+            alert('Neplatná částka dluhu.');
+            return;
+        }
+
+        debts.push({ person, description, amount, currency, paid: 0 });
+        saveData({ workLogs, finances, debts, rentSettings, taskCategories, expenseCategories });
+        renderDebts();
+        debtForm.reset();
+    });
+
+    paymentForm.addEventListener('submit', (e) => {
+        e.preventDefault();
+        const person = document.getElementById('payment-person').value;
+        const description = document.getElementById('payment-description').value;
+        const amount = parseFloat(document.getElementById('payment-amount').value);
+        const currency = document.getElementById('payment-currency').value;
+
+        if (isNaN(amount)) {
+            alert('Neplatná částka splátky.');
+            return;
+        }
+
+        // For simplicity, we'll just add a finance record for the payment
+        finances.push({ type: 'expense', description: `Splátka dluhu: ${description}`, amount, currency, date: new Date().toISOString().slice(0, 10) });
+        saveData({ workLogs, finances, debts, rentSettings, taskCategories, expenseCategories });
+        renderFinances();
+        renderDebts(); // Update debts overview after payment
+        paymentForm.reset();
+    });
+
+    const renderDebts = () => {
+        debtsListDiv.innerHTML = '';
+        const debtsByPerson = {};
+        debts.forEach(debt => {
+            if (!debtsByPerson[debt.person]) {
+                debtsByPerson[debt.person] = {};
+            }
+            if (!debtsByPerson[debt.person][debt.currency]) {
+                debtsByPerson[debt.person][debt.currency] = [];
+            }
+            debtsByPerson[debt.person][debt.currency].push(debt);
+        });
+
+        for (const person in debtsByPerson) {
+            const personDiv = document.createElement('div');
+            personDiv.innerHTML = `<h3>${person === 'maru' ? 'Maru' : 'Marty'}</h3>`;
+            for (const currency in debtsByPerson[person]) {
+                const currencyDiv = document.createElement('div');
+                currencyDiv.innerHTML = `<h4>${currency}</h4><ul></ul>`;
+                const ul = currencyDiv.querySelector('ul');
+                let totalDebt = 0;
+                debtsByPerson[person][currency].forEach(debt => {
+                    const li = document.createElement('li');
+                    li.textContent = `${debt.description}: ${debt.amount} ${debt.currency}`;
+                    ul.appendChild(li);
+                    totalDebt += debt.amount;
+                });
+                const totalLi = document.createElement('li');
+                totalLi.textContent = `Celkem: ${totalDebt} ${currency}`;
+                ul.appendChild(totalLi);
+                personDiv.appendChild(currencyDiv);
+            }
+            debtsListDiv.appendChild(personDiv);
+        }
+    };
+
+    // --- Nastavení ---
+    const renderCategories = () => {
+        taskCategoriesList.innerHTML = '';
+        taskCategories.forEach(category => {
+            const li = document.createElement('li');
+            li.textContent = category;
+            taskCategoriesList.appendChild(li);
+        });
+
+        expenseCategoriesList.innerHTML = '';
+        expenseCategories.forEach(category => {
+            const li = document.createElement('li');
+            li.textContent = category;
+            expenseCategoriesList.appendChild(li);
+        });
+    };
+
+    addTaskCategoryButton.addEventListener('click', () => {
+        const newCategory = newTaskCategoryInput.value.trim();
+        if (newCategory) {
+            taskCategories.push(newCategory);
+            saveData({ workLogs, finances, debts, rentSettings, taskCategories, expenseCategories });
+            renderCategories();
+            newTaskCategoryInput.value = '';
+        }
+    });
+
+    addExpenseCategoryButton.addEventListener('click', () => {
+        const newCategory = newExpenseCategoryInput.value.trim();
+        if (newCategory) {
+            expenseCategories.push(newCategory);
+            saveData({ workLogs, finances, debts, rentSettings, taskCategories, expenseCategories });
+            renderCategories();
+            newExpenseCategoryInput.value = '';
+        }
+    });
+
+    if (rentSettings.amount) {
+        rentAmountInput.value = rentSettings.amount;
     }
+    if (rentSettings.day) {
+        rentDayInput.value = rentSettings.day;
+    }
+
+    saveRentSettingsButton.addEventListener('click', () => {
+        const amount = parseFloat(rentAmountInput.value);
+        const day = parseInt(rentDayInput.value);
+        if (!isNaN(amount) && !isNaN(day) && day >= 1 && day <= 31) {
+            rentSettings.amount = amount;
+            rentSettings.day = day;
+            saveData({ workLogs, finances, debts, rentSettings, taskCategories, expenseCategories });
+            alert('Nastavení nájmu uloženo.');
+        } else {
+            alert('Neplatná výše nájmu nebo den v měsíci.');
+        }
+    });
+
+    const exportToCSV = (filename, rows) => {
+        const processRow = function (row) {
+            const finalVal = [];
+            for (let j = 0; j < row.length; j++) {
+                let innerValue = row[j] === null ? '' : row[j].toString();
+                if (row[j] instanceof Date) {
+                    innerValue = row[j].toLocaleString();
+                };
+                let result = innerValue.replace(/"/g, '""');
+                if (result.search(/("|,|\n)/g) >= 0)
+                    result = '"' + result + '"';
+                finalVal.push(result);
+            }
+            return finalVal.join(',');
+        };
+
+        let csvFile = '';
+        for (let i = 0; i < rows.length; i++) {
+            csvFile += processRow(rows[i]) + '\n';
+        }
+
+        const blob = new Blob([csvFile], { type: 'text/csv;charset=utf-8;' });
+        const link = document.createElement("a");
+        if (link.download !== undefined) {
+            const url = URL.createObjectURL(blob);
+            link.setAttribute("href", url);
+            link.setAttribute("download", filename);
+            link.style.visibility = 'hidden';
+            document.body.appendChild(link);
+            link.click();
+            document.body.removeChild(link);
+        }
+    };
+
+    exportWorkLogsButton.addEventListener('click', () => {
+        const header = ['Osoba', 'Datum', 'Začátek', 'Konec', 'Pauza', 'Odpracováno (min)', 'Výdělek (CZK)'];
+        const data = workLogs.map(log => [
+            log.person === 'maru' ? 'Maru' : 'Marty',
+            log.date,
+            log.start,
+            log.end,
+            log.break,
+            log.worked,
+            log.earnings.toFixed(2)
+        ]);
+        exportToCSV('work_logs.csv', [header, ...data]);
+    });
+
+    exportFinanceButton.addEventListener('click', () => {
+        const header = ['Typ', 'Popis', 'Částka', 'Měna', 'Datum'];
+        const data = finances.map(finance => [
+            finance.type === 'income' ? 'Příjem' : 'Výdaj',
+            finance.description,
+            finance.amount,
+            finance.currency,
+            finance.date
+        ]);
+        exportToCSV('finance.csv', [header, ...data]);
+    });
+
+    exportDebtsButton.addEventListener('click', () => {
+        const header = ['Osoba', 'Popis', 'Částka', 'Měna'];
+        const data = debts.map(debt => [
+            debt.person === 'maru' ? 'Maru' : 'Marty',
+            debt.description,
+            debt.amount,
+            debt.currency
+        ]);
+        exportToCSV('debts.csv', [header, ...data]);
+    });
+
+    // --- Initial Render ---
+    renderWorkLogs();
+    renderFinances();
+    renderDebts();
+    renderCategories();
 });
