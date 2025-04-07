@@ -437,6 +437,42 @@ document.addEventListener('DOMContentLoaded', () => {
         exportToCSV('debts.csv', [header, ...data]);
     });
 
+    const sections = document.querySelectorAll('main > section');
+    const navLinks = document.querySelectorAll('header nav ul li a');
+
+    // --- Přepínání sekcí ---
+    const showSection = (sectionId) => {
+        sections.forEach(section => {
+            section.classList.remove('active');
+        });
+        const sectionToShow = document.getElementById(sectionId);
+        if (sectionToShow) {
+            sectionToShow.classList.add('active');
+        }
+
+        navLinks.forEach(link => {
+            link.classList.remove('active');
+            if (link.getAttribute('data-section') === sectionId) {
+                link.classList.add('active');
+            }
+        });
+    };
+
+    navLinks.forEach(link => {
+        link.addEventListener('click', (e) => {
+            e.preventDefault();
+            const sectionId = link.getAttribute('data-section');
+            showSection(sectionId);
+        });
+    });
+
+    // Při načtení stránky zobrazit výchozí sekci
+    if (window.location.hash) {
+        showSection(window.location.hash.substring(1));
+    } else {
+        showSection('vyskazy'); // Zobrazit výkazy jako výchozí
+    }
+
     // --- Initial Render ---
     renderWorkLogs();
     renderFinances();
