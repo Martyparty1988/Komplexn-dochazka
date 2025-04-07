@@ -1,65 +1,116 @@
-body {
-    font-family: 'Inter', sans-serif; /* Nebo 'Poppins', 'Roboto' */
+/* Reset základních stylů */
+body, h1, h2, h3, h4, p, ul, li, table, form {
     margin: 0;
     padding: 0;
-    background-color: #f4f4f4;
+    border: 0;
+    font-size: 100%;
+    font: inherit;
+    vertical-align: baseline;
+}
+
+body {
+    font-family: 'Inter', sans-serif;
+    line-height: 1;
+    background-color: #f8f9fa; /* Světle šedá */
     color: #333;
-    line-height: 1.6;
+    display: flex;
+    flex-direction: column;
+    min-height: 100vh;
 }
 
 header {
-    background-color: #e0f7fa; /* Světle tyrkysová */
-    color: #00838f; /* Tmavě tyrkysová */
-    padding: 1rem 0;
-    text-align: center;
-    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+    background-color: #fff;
+    color: #495057; /* Tmavě šedá */
+    padding: 1rem 20px;
+    box-shadow: 0 0.125rem 0.25rem rgba(0, 0, 0, 0.075);
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+header h1 {
+    font-size: 1.5rem;
 }
 
 nav ul {
     list-style: none;
-    padding: 0;
-    margin: 0;
     display: flex;
-    justify-content: space-around;
+}
+
+nav li {
+    margin-left: 1rem;
 }
 
 nav a {
     display: block;
     padding: 0.5rem 1rem;
     text-decoration: none;
-    color: #00838f;
-    border-radius: 5px;
-    transition: background-color 0.3s ease;
+    color: #495057;
+    border-radius: 0.25rem;
+    transition: background-color 0.15s ease-in-out, color 0.15s ease-in-out;
 }
 
-nav a:hover {
-    background-color: #b2ebf2;
+nav a:hover, nav a.active {
+    background-color: #e9ecef; /* Světlejší šedá */
+    color: #007bff; /* Modrá */
+}
+
+nav a.active {
+    border-bottom: 2px solid #007bff;
 }
 
 main {
     padding: 20px;
+    flex-grow: 1;
 }
 
 .section {
     background-color: #fff;
     padding: 20px;
     margin-bottom: 20px;
-    border-radius: 8px;
-    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.05);
+    border-radius: 0.5rem;
+    box-shadow: 0 0.125rem 0.25rem rgba(0, 0, 0, 0.075);
+    transition: opacity 0.3s ease-in-out;
+}
+
+.section:last-child {
+    margin-bottom: 0;
+}
+
+.section:not(.active) {
+    display: none;
+}
+
+#vyskazy {
+    background-color: #e3f2fd; /* Světle modrá */
+}
+
+#finance {
+    background-color: #e8f5e9; /* Světle zelená */
+}
+
+#dluhy {
+    background-color: #fce4ec; /* Světle růžová */
+}
+
+#nastaveni {
+    background-color: #fff8e1; /* Světle žlutá */
 }
 
 h2, h3, h4 {
-    color: #00838f;
+    color: #495057;
     margin-top: 0;
+    margin-bottom: 1rem;
 }
 
 #timer {
-    background-color: #ffe0b2; /* Světle oranžová */
-    color: #e65100; /* Tmavě oranžová */
+    background-color: #f0f8ff; /* Velmi světle modrá */
+    color: #495057;
     padding: 15px;
-    border-radius: 8px;
+    border-radius: 0.5rem;
     margin-bottom: 20px;
     text-align: center;
+    box-shadow: 0 0.125rem 0.25rem rgba(0, 0, 0, 0.075);
 }
 
 #timer-time {
@@ -68,48 +119,66 @@ h2, h3, h4 {
 }
 
 #timer button {
-    padding: 8px 15px;
-    margin: 5px;
+    padding: 0.75rem 1.5rem;
+    margin: 0.25rem;
     border: none;
-    border-radius: 5px;
+    border-radius: 0.25rem;
     cursor: pointer;
     font-size: 1rem;
+    transition: background-color 0.15s ease-in-out;
 }
 
 #timer button#timer-start {
-    background-color: #a5d6a7; /* Světle zelená */
-    color: #1b5e20; /* Tmavě zelená */
+    background-color: #28a745; /* Zelená */
+    color: white;
+}
+
+#timer button#timer-start:hover {
+    background-color: #1e7e34;
 }
 
 #timer button#timer-pause {
-    background-color: #ffcc80; /* Světle oranžová */
-    color: #e65100; /* Tmavě oranžová */
+    background-color: #ffc107; /* Žlutá */
+    color: #212529;
+}
+
+#timer button#timer-pause:hover {
+    background-color: #e0a800;
 }
 
 #timer button#timer-stop {
-    background-color: #ef9a9a; /* Světle červená */
-    color: #b71c1c; /* Tmavě červená */
+    background-color: #dc3545; /* Červená */
+    color: white;
+}
+
+#timer button#timer-stop:hover {
+    background-color: #c82333;
 }
 
 #manual-entry-form, #finance-form, #debt-form, #payment-form {
     display: grid;
-    grid-template-columns: auto auto;
+    grid-template-columns: 1fr;
     gap: 10px;
     padding: 15px;
-    background-color: #f9f9f9;
-    border-radius: 5px;
+    background-color: #f8f9fa;
+    border-radius: 0.25rem;
     margin-bottom: 15px;
+    box-shadow: 0 0.125rem 0.25rem rgba(0, 0, 0, 0.075);
 }
 
 #manual-entry-form button, #finance-form button, #debt-form button, #payment-form button {
-    grid-column: 1 / span 2;
-    padding: 10px 15px;
+    padding: 0.75rem 1.5rem;
     border: none;
-    border-radius: 5px;
-    background-color: #64b5f6; /* Světle modrá */
+    border-radius: 0.25rem;
+    background-color: #007bff; /* Modrá */
     color: white;
     cursor: pointer;
     font-size: 1rem;
+    transition: background-color 0.15s ease-in-out;
+}
+
+#manual-entry-form button:hover, #finance-form button:hover, #debt-form button:hover, #payment-form button:hover {
+    background-color: #0056b3;
 }
 
 #manual-entry-form input[type="text"],
@@ -126,38 +195,49 @@ h2, h3, h4 {
 #payment-form input[type="text"],
 #payment-form input[type="number"],
 #payment-form select {
-    padding: 8px;
-    border: 1px solid #ccc;
-    border-radius: 4px;
+    padding: 0.5rem;
+    border: 1px solid #ced4da;
+    border-radius: 0.25rem;
     font-size: 1rem;
+}
+
+.table-responsive {
+    overflow-x: auto;
 }
 
 table {
     width: 100%;
     border-collapse: collapse;
     margin-top: 15px;
+    border-radius: 0.25rem;
+    overflow: hidden;
+    box-shadow: 0 0.125rem 0.25rem rgba(0, 0, 0, 0.075);
 }
 
 th, td {
-    border: 1px solid #ddd;
-    padding: 8px;
+    border: 1px solid #dee2e6;
+    padding: 0.75rem;
     text-align: left;
+    white-space: nowrap; /* Prevents text wrapping in table cells */
 }
 
 th {
-    background-color: #f0f0f0;
+    background-color: #f8f9fa;
+    font-weight: 600;
 }
 
 #debts-list > div {
     margin-bottom: 15px;
     padding: 15px;
-    border: 1px solid #ddd;
-    border-radius: 5px;
+    border: 1px solid #dee2e6;
+    border-radius: 0.25rem;
     background-color: #fff;
+    box-shadow: 0 0.125rem 0.25rem rgba(0, 0, 0, 0.075);
 }
 
 #debts-list h4 {
     margin-top: 0.5rem;
+    margin-bottom: 0.5rem;
 }
 
 #debts-list ul {
@@ -166,15 +246,16 @@ th {
 }
 
 #debts-list li {
-    padding: 5px 0;
+    padding: 0.25rem 0;
 }
 
 #categories-settings > div {
     margin-bottom: 15px;
     padding: 15px;
-    border: 1px solid #ddd;
-    border-radius: 5px;
+    border: 1px solid #dee2e6;
+    border-radius: 0.25rem;
     background-color: #fff;
+    box-shadow: 0 0.125rem 0.25rem rgba(0, 0, 0, 0.075);
 }
 
 #task-categories-list, #expense-categories-list {
@@ -183,7 +264,7 @@ th {
 }
 
 #task-categories-list li, #expense-categories-list li {
-    padding: 5px 0;
+    padding: 0.5rem 0;
     border-bottom: 1px solid #eee;
 }
 
@@ -192,87 +273,121 @@ th {
 }
 
 #categories-settings input[type="text"] {
-    padding: 8px;
-    border: 1px solid #ccc;
-    border-radius: 4px;
+    padding: 0.5rem;
+    border: 1px solid #ced4da;
+    border-radius: 0.25rem;
     margin-right: 10px;
 }
 
 #categories-settings button {
-    padding: 8px 15px;
+    padding: 0.75rem 1.5rem;
     border: none;
-    border-radius: 5px;
-    background-color: #81c784; /* Světle zelená */
+    border-radius: 0.25rem;
+    background-color: #28a745; /* Zelená */
     color: white;
     cursor: pointer;
     font-size: 1rem;
+    transition: background-color 0.15s ease-in-out;
+}
+
+#categories-settings button:hover {
+    background-color: #1e7e34;
+}
+
+#rent-settings {
+    padding: 15px;
+    border: 1px solid #dee2e6;
+    border-radius: 0.25rem;
+    background-color: #fff;
+    margin-bottom: 15px;
+    box-shadow: 0 0.125rem 0.25rem rgba(0, 0, 0, 0.075);
 }
 
 #rent-settings label {
     display: block;
-    margin-bottom: 5px;
+    margin-bottom: 0.5rem;
     font-weight: bold;
 }
 
 #rent-settings input[type="number"] {
     width: 100px;
-    padding: 8px;
-    margin-bottom: 10px;
-    border: 1px solid #ccc;
-    border-radius: 4px;
+    padding: 0.5rem;
+    margin-bottom: 1rem;
+    border: 1px solid #ced4da;
+    border-radius: 0.25rem;
 }
 
 #rent-settings button {
-    padding: 10px 15px;
+    padding: 0.75rem 1.5rem;
     border: none;
-    border-radius: 5px;
-    background-color: #ffb74d; /* Světle oranžová */
-    color: white;
+    border-radius: 0.25rem;
+    background-color: #ffc107; /* Žlutá */
+    color: #212529;
     cursor: pointer;
     font-size: 1rem;
+    transition: background-color 0.15s ease-in-out;
+}
+
+#rent-settings button:hover {
+    background-color: #e0a800;
+}
+
+#export-settings {
+    padding: 15px;
+    border: 1px solid #dee2e6;
+    border-radius: 0.25rem;
+    background-color: #fff;
+    box-shadow: 0 0.125rem 0.25rem rgba(0, 0, 0, 0.075);
 }
 
 #export-settings button {
     display: block;
     width: 200px;
-    padding: 10px 15px;
-    margin: 10px 0;
+    padding: 0.75rem 1.5rem;
+    margin: 0.5rem 0;
     border: none;
-    border-radius: 5px;
-    background-color: #90caf9; /* Světle modrá */
+    border-radius: 0.25rem;
+    background-color: #007bff; /* Modrá */
     color: white;
     cursor: pointer;
     font-size: 1rem;
     text-align: center;
+    transition: background-color 0.15s ease-in-out;
+}
+
+#export-settings button:hover {
+    background-color: #0056b3;
 }
 
 footer {
     text-align: center;
-    padding: 1rem 0;
-    background-color: #e0f7fa;
-    color: #00838f;
-    position: sticky;
-    bottom: 0;
-    width: 100%;
-    box-shadow: 0 -2px 5px rgba(0, 0, 0, 0.1);
+    padding: 1rem 20px;
+    background-color: #f8f9fa;
+    color: #495057;
+    box-shadow: 0 -0.125rem 0.25rem rgba(0, 0, 0, 0.075);
 }
 
 /* Mobilní zobrazení */
 @media (max-width: 600px) {
+    header {
+        flex-direction: column;
+        align-items: flex-start;
+    }
+
+    header h1 {
+        margin-bottom: 0.5rem;
+    }
+
     nav ul {
         flex-direction: column;
-        text-align: center;
     }
 
     nav li {
+        margin-left: 0;
         margin-bottom: 0.5rem;
     }
 
     #manual-entry-form, #finance-form, #debt-form, #payment-form {
         grid-template-columns: 1fr;
-    }
-
-    #manual-entry-form button, #finance-form button, #debt-form button, #payment-form button {
-        grid-column: 1;
     }
 }
