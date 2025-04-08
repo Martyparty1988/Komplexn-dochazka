@@ -2,20 +2,25 @@
 <html lang="cs">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <meta name="theme-color" content="#4a6da7">
+    <meta name="format-detection" content="telephone=no">
     <title>Pracovní výkazy & Finance</title>
     <link rel="stylesheet" href="style.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-b3/css/all.min.css">
     <link rel="manifest" href="manifest.json">
+    <link rel="apple-touch-icon" href="icons/icon-192x192.png">
 </head>
 <body>
     <header>
         <h1>Pracovní výkazy & Finance</h1>
         <nav>
             <ul>
-                <li><a href="#vyskazy" data-section="vyskazy" class="active">Pracovní výkazy</a></li>
+                <li><a href="#vyskazy" data-section="vyskazy" class="active">Výkazy</a></li>
                 <li><a href="#finance" data-section="finance">Finance</a></li>
-                <li><a href="#dluhy" data-section="dluhy">Dluhy a splátky</a></li>
+                <li><a href="#dluhy" data-section="dluhy">Dluhy</a></li>
                 <li><a href="#nastaveni" data-section="nastaveni">Nastavení</a></li>
             </ul>
         </nav>
@@ -48,8 +53,8 @@
                     
                     <div class="timer-activity-select">
                         <select id="timer-activity">
-                            <option value="">-- Vyberte činnost --</option>
-                            <!-- Bude naplněno dynamicky -->
+                            <option value="">-- Vyberte úkol --</option>
+                            <!-- Bude naplněno dynamicky z kategorií úkolů -->
                         </select>
                     </div>
                     
@@ -88,9 +93,9 @@
                         <input type="number" id="manual-break-time" min="0" value="0">
                     </div>
                     <div class="form-group">
-                        <label for="manual-activity">Činnost:</label>
+                        <label for="manual-activity">Úkol:</label>
                         <select id="manual-activity">
-                            <option value="">-- Vyberte činnost --</option>
+                            <option value="">-- Vyberte úkol --</option>
                             <!-- Bude naplněno dynamicky -->
                         </select>
                     </div>
@@ -109,9 +114,9 @@
                                 <th>Začátek</th>
                                 <th>Konec</th>
                                 <th>Pauza</th>
-                                <th>Odpracováno</th>
+                                <th>Práce</th>
                                 <th>Výdělek</th>
-                                <th>Činnost</th>
+                                <th>Úkol</th>
                                 <th>Akce</th>
                             </tr>
                         </thead>
@@ -272,10 +277,8 @@
             <h2>Nastavení</h2>
             
             <div class="categories-management">
-                <h3>Správa kategorií</h3>
-                
                 <div class="category-section">
-                    <h4>Kategorie úkolů</h4>
+                    <h3>Kategorie úkolů</h3>
                     <ul id="task-categories-list">
                         <!-- Bude naplněno dynamicky -->
                     </ul>
@@ -286,24 +289,13 @@
                 </div>
                 
                 <div class="category-section">
-                    <h4>Kategorie výdajů</h4>
+                    <h3>Kategorie výdajů</h3>
                     <ul id="expense-categories-list">
                         <!-- Bude naplněno dynamicky -->
                     </ul>
                     <div class="add-category">
                         <input type="text" id="new-expense-category" placeholder="Nová kategorie výdajů">
                         <button id="add-expense-category">Přidat</button>
-                    </div>
-                </div>
-                
-                <div class="category-section">
-                    <h4>Činnosti pro časovač</h4>
-                    <ul id="activities-list">
-                        <!-- Bude naplněno dynamicky -->
-                    </ul>
-                    <div class="add-category">
-                        <input type="text" id="new-activity" placeholder="Nová činnost">
-                        <button id="add-activity">Přidat</button>
                     </div>
                 </div>
             </div>
@@ -334,9 +326,12 @@
         <p>&copy; 2025 Pracovní výkazy & Finance</p>
     </footer>
 
+    <div id="offline-notification" class="offline-notification">
+        Jste offline. Data jsou stále dostupná.
+    </div>
+
     <script src="app.js"></script>
     <script>
-        // Registrace Service Worker pro offline funkcionalitu
         if ('serviceWorker' in navigator) {
             window.addEventListener('load', () => {
                 navigator.serviceWorker.register('/service-worker.js')
@@ -344,6 +339,9 @@
                     .catch(err => console.log('Service Worker registrace selhala:', err));
             });
         }
+        
+        // Pro iOS - oprava pro reagování na kliknutí
+        document.addEventListener('touchstart', function() {}, {passive: true});
     </script>
 </body>
 </html>
