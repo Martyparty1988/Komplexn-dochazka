@@ -4,53 +4,103 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Pracovní výkazy & Finance</title>
-    <link rel="manifest" href="manifest.json">
     <link rel="stylesheet" href="style.css">
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-b3/css/all.min.css" integrity="sha512-Fo3rlrZj/k7ujTnHg4CGR2D7kSs0v4LLanw2qksYuRlEzO+tcaEPQogQ0KaoGN26/zrn20ImR1DfuLWnOo7aBA==" crossorigin="anonymous" referrerpolicy="no-referrer" />
-    <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-b3/css/all.min.css">
+    <link rel="manifest" href="manifest.json">
 </head>
 <body>
     <header>
         <h1>Pracovní výkazy & Finance</h1>
         <nav>
             <ul>
-                <li><a href="#vyskazy" data-section="vyskazy"><i class="fas fa-clock"></i> Pracovní výkazy</a></li>
-                <li><a href="#finance" data-section="finance"><i class="fas fa-coins"></i> Finance</a></li>
-                <li><a href="#dluhy" data-section="dluhy"><i class="fas fa-file-invoice-dollar"></i> Dluhy a splátky</a></li>
-                <li><a href="#nastaveni" data-section="nastaveni"><i class="fas fa-cog"></i> Nastavení</a></li>
+                <li><a href="#vyskazy" data-section="vyskazy" class="active">Pracovní výkazy</a></li>
+                <li><a href="#finance" data-section="finance">Finance</a></li>
+                <li><a href="#dluhy" data-section="dluhy">Dluhy a splátky</a></li>
+                <li><a href="#nastaveni" data-section="nastaveni">Nastavení</a></li>
             </ul>
         </nav>
     </header>
 
     <main>
-        <section id="vyskazy" class="section active">
+        <section id="vyskazy" class="active">
             <h2>Pracovní výkazy</h2>
-            <div id="timer">
-                <span id="timer-person"></span>
-                <span id="timer-time">00:00:00</span>
-                <button id="timer-start"><i class="fas fa-play"></i> Spustit</button>
-                <button id="timer-pause" disabled><i class="fas fa-pause"></i> Pauza</button>
-                <button id="timer-stop" disabled><i class="fas fa-stop"></i> Zastavit</button>
+            
+            <div class="timer-container">
+                <div class="timer-display">
+                    <div id="timer-time">00:00:00</div>
+                    <div id="timer-info">
+                        <span id="timer-person"></span>
+                        <span id="timer-activity-display"></span>
+                    </div>
+                </div>
+                
+                <div class="timer-controls">
+                    <div class="timer-person-select" id="timer-person-select">
+                        <label>
+                            <input type="radio" name="timer-person" value="maru" checked>
+                            Maru
+                        </label>
+                        <label>
+                            <input type="radio" name="timer-person" value="marty">
+                            Marty
+                        </label>
+                    </div>
+                    
+                    <div class="timer-activity-select">
+                        <select id="timer-activity">
+                            <option value="">-- Vyberte činnost --</option>
+                            <!-- Bude naplněno dynamicky -->
+                        </select>
+                    </div>
+                    
+                    <div class="timer-buttons">
+                        <button id="timer-start">Spustit</button>
+                        <button id="timer-pause" disabled>Pauza</button>
+                        <button id="timer-stop" disabled>Zastavit</button>
+                    </div>
+                </div>
             </div>
-            <div id="manual-entry">
+
+            <div class="manual-entry">
                 <h3>Ruční zadání výkazu</h3>
                 <form id="manual-entry-form">
-                    <select id="manual-person">
-                        <option value="maru">Maru</option>
-                        <option value="marty">Marty</option>
-                    </select>
-                    <input type="date" id="manual-date">
-                    <input type="text" id="manual-start-time" placeholder="Začátek (HH:MM)">
-                    <input type="text" id="manual-end-time" placeholder="Konec (HH:MM)">
-                    <input type="text" id="manual-break-time" placeholder="Pauza (min)">
+                    <div class="form-group">
+                        <label for="manual-person">Osoba:</label>
+                        <select id="manual-person" required>
+                            <option value="maru">Maru</option>
+                            <option value="marty">Marty</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label for="manual-date">Datum:</label>
+                        <input type="date" id="manual-date" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="manual-start-time">Začátek:</label>
+                        <input type="time" id="manual-start-time" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="manual-end-time">Konec:</label>
+                        <input type="time" id="manual-end-time" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="manual-break-time">Pauza (minuty):</label>
+                        <input type="number" id="manual-break-time" min="0" value="0">
+                    </div>
+                    <div class="form-group">
+                        <label for="manual-activity">Činnost:</label>
+                        <select id="manual-activity">
+                            <option value="">-- Vyberte činnost --</option>
+                            <!-- Bude naplněno dynamicky -->
+                        </select>
+                    </div>
                     <button type="submit">Přidat výkaz</button>
                 </form>
             </div>
-            <div id="work-logs">
+
+            <div class="work-logs">
                 <h3>Přehled výkazů</h3>
-                <div class="table-responsive">
+                <div class="table-container">
                     <table>
                         <thead>
                             <tr>
@@ -61,37 +111,65 @@
                                 <th>Pauza</th>
                                 <th>Odpracováno</th>
                                 <th>Výdělek</th>
+                                <th>Činnost</th>
+                                <th>Akce</th>
                             </tr>
                         </thead>
-                        <tbody id="work-logs-table"></tbody>
+                        <tbody id="work-logs-table">
+                            <!-- Bude naplněno dynamicky -->
+                        </tbody>
                     </table>
                 </div>
             </div>
         </section>
 
-        <section id="finance" class="section">
+        <section id="finance">
             <h2>Finance</h2>
-            <div id="income-expense">
+            
+            <div class="finance-entry">
                 <h3>Přidat příjem/výdaj</h3>
                 <form id="finance-form">
-                    <select id="finance-type">
-                        <option value="income">Příjem</option>
-                        <option value="expense">Výdaj</option>
-                    </select>
-                    <input type="text" id="finance-description" placeholder="Popis">
-                    <input type="number" id="finance-amount" placeholder="Částka">
-                    <select id="finance-currency">
-                        <option value="CZK">CZK</option>
-                        <option value="EUR">EUR</option>
-                        <option value="USD">USD</option>
-                    </select>
-                    <input type="date" id="finance-date">
+                    <div class="form-group">
+                        <label for="finance-type">Typ:</label>
+                        <select id="finance-type" required>
+                            <option value="income">Příjem</option>
+                            <option value="expense">Výdaj</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label for="finance-description">Popis:</label>
+                        <input type="text" id="finance-description" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="finance-amount">Částka:</label>
+                        <input type="number" id="finance-amount" min="0" step="0.01" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="finance-currency">Měna:</label>
+                        <select id="finance-currency" required>
+                            <option value="CZK">CZK</option>
+                            <option value="EUR">EUR</option>
+                            <option value="USD">USD</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label for="finance-date">Datum:</label>
+                        <input type="date" id="finance-date" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="finance-category">Kategorie:</label>
+                        <select id="finance-category">
+                            <option value="">-- Vyberte kategorii --</option>
+                            <!-- Bude naplněno dynamicky -->
+                        </select>
+                    </div>
                     <button type="submit">Přidat</button>
                 </form>
             </div>
-            <div id="financial-transactions">
+
+            <div class="finance-logs">
                 <h3>Přehled financí</h3>
-                <div class="table-responsive">
+                <div class="table-container">
                     <table>
                         <thead>
                             <tr>
@@ -100,82 +178,150 @@
                                 <th>Částka</th>
                                 <th>Měna</th>
                                 <th>Datum</th>
+                                <th>Kategorie</th>
+                                <th>Akce</th>
                             </tr>
                         </thead>
-                        <tbody id="finance-table"></tbody>
+                        <tbody id="finance-table">
+                            <!-- Bude naplněno dynamicky -->
+                        </tbody>
                     </table>
                 </div>
             </div>
         </section>
 
-        <section id="dluhy" class="section">
+        <section id="dluhy">
             <h2>Dluhy a splátky</h2>
-            <div id="debts-overview">
+            
+            <div class="debts-overview">
                 <h3>Přehled dluhů</h3>
-                <div id="debts-list"></div>
+                <div id="debts-list">
+                    <!-- Bude naplněno dynamicky -->
+                </div>
             </div>
-            <div id="add-debt">
+
+            <div class="debt-entry">
                 <h3>Přidat dluh</h3>
                 <form id="debt-form">
-                    <select id="debt-person">
-                        <option value="maru">Maru</option>
-                        <option value="marty">Marty</option>
-                    </select>
-                    <input type="text" id="debt-description" placeholder="Popis dluhu">
-                    <input type="number" id="debt-amount" placeholder="Částka">
-                    <select id="debt-currency">
-                        <option value="CZK">CZK</option>
-                        <option value="EUR">EUR</option>
-                        <option value="USD">USD</option>
-                    </select>
+                    <div class="form-group">
+                        <label for="debt-person">Osoba:</label>
+                        <select id="debt-person" required>
+                            <option value="maru">Maru</option>
+                            <option value="marty">Marty</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label for="debt-description">Popis:</label>
+                        <input type="text" id="debt-description" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="debt-amount">Částka:</label>
+                        <input type="number" id="debt-amount" min="0" step="0.01" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="debt-currency">Měna:</label>
+                        <select id="debt-currency" required>
+                            <option value="CZK">CZK</option>
+                            <option value="EUR">EUR</option>
+                            <option value="USD">USD</option>
+                        </select>
+                    </div>
                     <button type="submit">Přidat dluh</button>
                 </form>
             </div>
-            <div id="add-payment">
+
+            <div class="payment-entry">
                 <h3>Přidat splátku</h3>
                 <form id="payment-form">
-                    <select id="payment-person">
-                        <option value="maru">Maru</option>
-                        <option value="marty">Marty</option>
-                    </select>
-                    <input type="text" id="payment-description" placeholder="Popis splátky (např. Nájem)">
-                    <input type="number" id="payment-amount" placeholder="Částka">
-                    <select id="payment-currency">
-                        <option value="CZK">CZK</option>
-                        <option value="EUR">EUR</option>
-                        <option value="USD">USD</option>
-                    </select>
+                    <div class="form-group">
+                        <label for="payment-person">Osoba:</label>
+                        <select id="payment-person" required>
+                            <option value="maru">Maru</option>
+                            <option value="marty">Marty</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label for="payment-debt-id">Dluh:</label>
+                        <select id="payment-debt-id">
+                            <option value="">-- Vyberte dluh --</option>
+                            <!-- Bude naplněno dynamicky -->
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label for="payment-description">Popis:</label>
+                        <input type="text" id="payment-description" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="payment-amount">Částka:</label>
+                        <input type="number" id="payment-amount" min="0" step="0.01" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="payment-currency">Měna:</label>
+                        <select id="payment-currency" required>
+                            <option value="CZK">CZK</option>
+                            <option value="EUR">EUR</option>
+                            <option value="USD">USD</option>
+                        </select>
+                    </div>
                     <button type="submit">Přidat splátku</button>
                 </form>
             </div>
         </section>
 
-        <section id="nastaveni" class="section">
+        <section id="nastaveni">
             <h2>Nastavení</h2>
-            <div id="categories-settings">
+            
+            <div class="categories-management">
                 <h3>Správa kategorií</h3>
-                <div id="task-categories">
+                
+                <div class="category-section">
                     <h4>Kategorie úkolů</h4>
-                    <ul id="task-categories-list"></ul>
-                    <input type="text" id="new-task-category" placeholder="Nová kategorie">
-                    <button id="add-task-category">Přidat</button>
+                    <ul id="task-categories-list">
+                        <!-- Bude naplněno dynamicky -->
+                    </ul>
+                    <div class="add-category">
+                        <input type="text" id="new-task-category" placeholder="Nová kategorie úkolu">
+                        <button id="add-task-category">Přidat</button>
+                    </div>
                 </div>
-                <div id="expense-categories">
+                
+                <div class="category-section">
                     <h4>Kategorie výdajů</h4>
-                    <ul id="expense-categories-list"></ul>
-                    <input type="text" id="new-expense-category" placeholder="Nová kategorie">
-                    <button id="add-expense-category">Přidat</button>
+                    <ul id="expense-categories-list">
+                        <!-- Bude naplněno dynamicky -->
+                    </ul>
+                    <div class="add-category">
+                        <input type="text" id="new-expense-category" placeholder="Nová kategorie výdajů">
+                        <button id="add-expense-category">Přidat</button>
+                    </div>
+                </div>
+                
+                <div class="category-section">
+                    <h4>Činnosti pro časovač</h4>
+                    <ul id="activities-list">
+                        <!-- Bude naplněno dynamicky -->
+                    </ul>
+                    <div class="add-category">
+                        <input type="text" id="new-activity" placeholder="Nová činnost">
+                        <button id="add-activity">Přidat</button>
+                    </div>
                 </div>
             </div>
-            <div id="rent-settings">
+            
+            <div class="rent-settings">
                 <h3>Nastavení nájmu</h3>
-                <label for="rent-amount">Výše nájmu:</label>
-                <input type="number" id="rent-amount">
-                <label for="rent-day">Den v měsíci:</label>
-                <input type="number" id="rent-day" min="1" max="31">
+                <div class="form-group">
+                    <label for="rent-amount">Výše nájmu:</label>
+                    <input type="number" id="rent-amount" min="0" step="0.01">
+                </div>
+                <div class="form-group">
+                    <label for="rent-day">Den v měsíci:</label>
+                    <input type="number" id="rent-day" min="1" max="31">
+                </div>
                 <button id="save-rent-settings">Uložit</button>
             </div>
-            <div id="export-settings">
+            
+            <div class="data-export">
                 <h3>Export dat</h3>
                 <button id="export-work-logs">Export výkazů (CSV)</button>
                 <button id="export-finance">Export financí (CSV)</button>
@@ -190,8 +336,13 @@
 
     <script src="app.js"></script>
     <script>
+        // Registrace Service Worker pro offline funkcionalitu
         if ('serviceWorker' in navigator) {
-            navigator.serviceWorker.register('/service-worker.js');
+            window.addEventListener('load', () => {
+                navigator.serviceWorker.register('/service-worker.js')
+                    .then(reg => console.log('Service Worker registrován!', reg))
+                    .catch(err => console.log('Service Worker registrace selhala:', err));
+            });
         }
     </script>
 </body>
