@@ -1,3 +1,23 @@
+
+// === Firebase Setup ===
+import { initializeApp } from "https://www.gstatic.com/firebasejs/9.22.2/firebase-app.js";
+import { getFirestore, collection, addDoc, getDocs, setDoc, doc, updateDoc, deleteDoc, onSnapshot } from "https://www.gstatic.com/firebasejs/9.22.2/firebase-firestore.js";
+
+const firebaseConfig = {
+  apiKey: "AIzaSyDcE-klbgLBaPDA-RPPF4oYlrSr36nk9XM",
+  authDomain: "vykazy-prace.firebaseapp.com",
+  projectId: "vykazy-prace",
+  storageBucket: "vykazy-prace.firebasestorage.app",
+  messagingSenderId: "513316043274",
+  appId: "1:513316043274:web:5f8c02346167a881a4fdf3",
+  measurementId: "G-SM3WHXG3TL"
+};
+
+const app = initializeApp(firebaseConfig);
+const db = getFirestore(app);
+// === Konec Firebase Setup ===
+
+
 /**
  * app.js
  * Hlavní aplikační soubor
@@ -676,3 +696,195 @@ document.addEventListener('DOMContentLoaded', () => {
         console.error('Chyba při inicializaci aplikace:', error);
     });
 });
+
+
+// === Firebase Firestore Functions ===
+
+// --- DOCHÁZKA ---
+async function saveWorklogToFirestore(log) {
+  try {
+    const docRef = await addDoc(collection(db, "worklogs"), log);
+    console.log("Docházka uložena s ID:", docRef.id);
+  } catch (e) {
+    console.error("Chyba při ukládání docházky:", e);
+  }
+}
+
+async function loadWorklogsFromFirestore() {
+  const querySnapshot = await getDocs(collection(db, "worklogs"));
+  let worklogs = [];
+  querySnapshot.forEach((doc) => {
+    worklogs.push({ id: doc.id, ...doc.data() });
+  });
+  return worklogs;
+}
+
+// --- FINANCE ---
+async function saveFinanceToFirestore(finance) {
+  try {
+    const docRef = await addDoc(collection(db, "finances"), finance);
+    console.log("Finance uloženy s ID:", docRef.id);
+  } catch (e) {
+    console.error("Chyba při ukládání financí:", e);
+  }
+}
+
+async function loadFinancesFromFirestore() {
+  const querySnapshot = await getDocs(collection(db, "finances"));
+  let finances = [];
+  querySnapshot.forEach((doc) => {
+    finances.push({ id: doc.id, ...doc.data() });
+  });
+  return finances;
+}
+
+// --- DLUHY ---
+async function saveDebtToFirestore(debt) {
+  try {
+    const docRef = await addDoc(collection(db, "debts"), debt);
+    console.log("Dluh uložen s ID:", docRef.id);
+  } catch (e) {
+    console.error("Chyba při ukládání dluhu:", e);
+  }
+}
+
+async function loadDebtsFromFirestore() {
+  const querySnapshot = await getDocs(collection(db, "debts"));
+  let debts = [];
+  querySnapshot.forEach((doc) => {
+    debts.push({ id: doc.id, ...doc.data() });
+  });
+  return debts;
+}
+
+// --- SPLÁTKY ---
+async function savePaymentToFirestore(payment) {
+  try {
+    const docRef = await addDoc(collection(db, "payments"), payment);
+    console.log("Splátka uložena s ID:", docRef.id);
+  } catch (e) {
+    console.error("Chyba při ukládání splátky:", e);
+  }
+}
+
+async function loadPaymentsFromFirestore() {
+  const querySnapshot = await getDocs(collection(db, "payments"));
+  let payments = [];
+  querySnapshot.forEach((doc) => {
+    payments.push({ id: doc.id, ...doc.data() });
+  });
+  return payments;
+}
+// === Konec Firestore Functions ===
+
+
+
+// === Firebase Live Sync ===
+
+// Živá synchronizace docházky
+onSnapshot(collection(db, "worklogs"), (snapshot) => {
+  const worklogs = [];
+  snapshot.forEach((doc) => worklogs.push({ id: doc.id, ...doc.data() }));
+  console.log("Aktualizovaná docházka:", worklogs);
+  // TODO: Zde napojit na funkci pro zobrazení docházky v UI
+});
+
+// Živá synchronizace financí
+onSnapshot(collection(db, "finances"), (snapshot) => {
+  const finances = [];
+  snapshot.forEach((doc) => finances.push({ id: doc.id, ...doc.data() }));
+  console.log("Aktualizované finance:", finances);
+  // TODO: Zde napojit na funkci pro zobrazení financí v UI
+});
+
+// Živá synchronizace dluhů
+onSnapshot(collection(db, "debts"), (snapshot) => {
+  const debts = [];
+  snapshot.forEach((doc) => debts.push({ id: doc.id, ...doc.data() }));
+  console.log("Aktualizované dluhy:", debts);
+  // TODO: Zde napojit na funkci pro zobrazení dluhů v UI
+});
+
+// Živá synchronizace splátek
+onSnapshot(collection(db, "payments"), (snapshot) => {
+  const payments = [];
+  snapshot.forEach((doc) => payments.push({ id: doc.id, ...doc.data() }));
+  console.log("Aktualizované splátky:", payments);
+  // TODO: Zde napojit na funkci pro zobrazení splátek v UI
+});
+
+// === Konec Live Sync ===
+
+
+
+// === UI RENDER FUNCTIONS ===
+
+// RENDER DOCHÁZKY
+function renderWorklogs(worklogs) {
+  const container = document.getElementById("work-logs-accordion");
+  if (!container) return;
+
+  if (worklogs.length === 0) {
+    container.innerHTML = '<div class="accordion-empty">Žádné záznamy k zobrazení</div>';
+    return;
+  }
+
+  container.innerHTML = worklogs.map(log => {
+    return \`
+      <div class="accordion-item">
+        <div class="accordion-header">
+          <div class="accordion-header-content">
+            <strong>\${log.person.toUpperCase()}</strong> — \${log.activity || "Úkol nevyplněn"}
+          </div>
+          <div class="accordion-header-right">
+            <span>\${log.date || "Bez data"}</span>
+          </div>
+        </div>
+        <div class="accordion-content">
+          <div class="accordion-content-inner">
+            <p><strong>Začátek:</strong> \${log.startTime || "-"}</p>
+            <p><strong>Konec:</strong> \${log.endTime || "-"}</p>
+            <p><strong>Pauza:</strong> \${log.breakMinutes || 0} min</p>
+            <p><strong>Poznámka:</strong> \${log.note || "-"}</p>
+          </div>
+        </div>
+      </div>
+    \`;
+  }).join("");
+}
+
+// RENDER FINANCÍ
+function renderFinances(finances) {
+  const table = document.getElementById("finance-table");
+  if (!table) return;
+
+  table.innerHTML = finances.map(fin => {
+    return \`
+      <tr>
+        <td>\${fin.type === "income" ? "Příjem" : "Výdaj"}</td>
+        <td>\${fin.description}</td>
+        <td>\${fin.amount}</td>
+        <td>\${fin.currency}</td>
+        <td>\${fin.date}</td>
+        <td>\${fin.category || "-"}</td>
+        <td><span class="delete-btn" onclick="deleteFinance('\${fin.id}')"><i class="fas fa-trash-alt"></i></span></td>
+      </tr>
+    \`;
+  }).join("");
+}
+
+// RENDER DLUHŮ
+function renderDebts(debts) {
+  const container = document.getElementById("debts-list");
+  if (!container) return;
+
+  container.innerHTML = debts.map(debt => {
+    return \`
+      <div class="debt-item">
+        <strong>\${debt.person.toUpperCase()}</strong>: \${debt.description} – \${debt.amount} \${debt.currency}
+      </div>
+    \`;
+  }).join("");
+}
+
+// === Konec UI RENDER FUNCTIONS ===
