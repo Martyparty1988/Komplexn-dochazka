@@ -1377,3 +1377,33 @@ footer {
         background-color: #3498db;
     }
 }
+``css
+/* Oprava viditelnosti textu v rozbalovacích menu */
+select option {
+    background-color: white;
+    color: #333;
+}
+
+/* Pro tmavý režim */
+@media (prefers-color-scheme: dark) {
+    select option {
+        background-color: #2a2a2a;
+        color: #f0f0f0;
+    }
+}
+
+/* Oprava zobrazení na iOS zařízeních */
+select {
+    -webkit-appearance: none;
+    -moz-appearance: none;
+    appearance: none;
+    background-image: url("data:image/svg+xml;utf8,<svg fill='gray' height='24' viewBox='0 0 24 24' width='24' xmlns='http://www.w3.org/2000/svg'><path d='M7 10l5 5 5-5z'/><path d='M0 0h24v24H0z' fill='none'/></svg>");
+    background-repeat: no-repeat;
+    background-position: right 8px center;
+    padding-right: 30px !important;
+}
+
+/* Ošetření viditelnosti přes všechny prohlížeče */
+select, select option {
+    color-scheme: light dark;
+}
