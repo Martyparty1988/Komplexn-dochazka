@@ -33,7 +33,7 @@
     <main>
         <section id="dochazka" class="active">
             <h2>Docházka</h2>
-            
+
             <div class="timer-container">
                 <div class="timer-display">
                     <div id="timer-time">00:00:00</div>
@@ -42,7 +42,7 @@
                         <span id="timer-activity-display"></span>
                     </div>
                 </div>
-                
+
                 <div class="timer-controls">
                     <div class="timer-person-select" id="timer-person-select">
                         <label>
@@ -54,14 +54,13 @@
                             Marty
                         </label>
                     </div>
-                    
+
                     <div class="timer-activity-select">
                         <select id="timer-activity">
                             <option value="">-- Vyberte úkol --</option>
-                            <!-- Bude naplněno dynamicky z kategorií úkolů -->
-                        </select>
+                            </select>
                     </div>
-                    
+
                     <div class="timer-buttons">
                         <button id="timer-start">Spustit</button>
                         <button id="timer-pause" disabled>Pauza</button>
@@ -106,8 +105,7 @@
                             <label for="manual-activity">Úkol:</label>
                             <select id="manual-activity">
                                 <option value="">-- Vyberte úkol --</option>
-                                <!-- Bude naplněno dynamicky -->
-                            </select>
+                                </select>
                         </div>
                         <div class="form-group">
                             <label for="manual-note">Poznámka:</label>
@@ -124,7 +122,7 @@
 
         <section id="finance">
             <h2>Finance</h2>
-            
+
             <div class="finance-entry">
                 <h3>Přidat příjem/výdaj</h3>
                 <form id="finance-form">
@@ -151,8 +149,7 @@
                             <label for="finance-category">Kategorie:</label>
                             <select id="finance-category">
                                 <option value="">-- Vyberte kategorii --</option>
-                                <!-- Bude naplněno dynamicky -->
-                            </select>
+                                </select>
                         </div>
                     </div>
                     <div class="form-row">
@@ -192,8 +189,7 @@
                             </tr>
                         </thead>
                         <tbody id="finance-table">
-                            <!-- Bude naplněno dynamicky -->
-                        </tbody>
+                            </tbody>
                     </table>
                 </div>
             </div>
@@ -201,7 +197,7 @@
 
         <section id="srazky">
             <h2>Srážky</h2>
-            
+
             <div class="deductions-summary">
                 <h3>Přehled srážek</h3>
                 <div class="info-box">
@@ -219,17 +215,15 @@
                             </tr>
                         </thead>
                         <tbody id="deductions-summary-table">
-                            <!-- Bude naplněno dynamicky -->
-                        </tbody>
+                            </tbody>
                     </table>
                 </div>
             </div>
-            
+
             <div class="debts-overview">
                 <h3>Dluhy a splátky</h3>
                 <div id="debts-list">
-                    <!-- Bude naplněno dynamicky -->
-                </div>
+                    </div>
             </div>
 
             <div class="debt-entry">
@@ -286,8 +280,7 @@
                             <label for="payment-debt-id">Dluh:</label>
                             <select id="payment-debt-id">
                                 <option value="">-- Vyberte dluh --</option>
-                                <!-- Bude naplněno dynamicky -->
-                            </select>
+                                </select>
                         </div>
                     </div>
                     <div class="form-row">
@@ -318,7 +311,7 @@
 
         <section id="prehledy">
             <h2>Přehledy</h2>
-            
+
             <div class="filters-container">
                 <h3>Filtry</h3>
                 <form id="filters-form">
@@ -343,8 +336,7 @@
                             <label for="filter-activity">Úkol:</label>
                             <select id="filter-activity">
                                 <option value="">Všechny úkoly</option>
-                                <!-- Bude naplněno dynamicky -->
-                            </select>
+                                </select>
                         </div>
                     </div>
                     <div class="form-actions">
@@ -353,7 +345,7 @@
                     </div>
                 </form>
             </div>
-            
+
             <div class="graph-container">
                 <h3>Grafický přehled</h3>
                 <div class="chart-options">
@@ -362,36 +354,16 @@
                     <button type="button" data-chart-type="month">Podle měsíce</button>
                 </div>
                 <div id="chart-area">
-                    <!-- Zde bude vložen graf -->
-                </div>
+                    </div>
             </div>
-            
-            <div class="work-logs">
+
+            <div class="work-logs accordion-container">
                 <h3>Přehled záznamů</h3>
-                <div class="table-container">
-                    <table>
-                        <thead>
-                            <tr>
-                                <th>Osoba</th>
-                                <th>Datum</th>
-                                <th>Začátek</th>
-                                <th>Konec</th>
-                                <th>Pauza</th>
-                                <th>Práce</th>
-                                <th>Výdělek</th>
-                                <th>Srážka</th>
-                                <th>Úkol</th>
-                                <th>Poznámka</th>
-                                <th>Akce</th>
-                            </tr>
-                        </thead>
-                        <tbody id="work-logs-table">
-                            <!-- Bude naplněno dynamicky -->
-                        </tbody>
-                    </table>
+                <div id="work-logs-accordion">
+                    <div class="accordion-empty">Žádné záznamy k zobrazení</div>
                 </div>
             </div>
-            
+
             <div class="export-actions">
                 <h3>Export dat</h3>
                 <button id="export-work-logs">Export záznamů (CSV)</button>
@@ -403,31 +375,29 @@
 
         <section id="nastaveni">
             <h2>Nastavení</h2>
-            
+
             <div class="categories-management">
                 <div class="category-section">
                     <h3>Kategorie úkolů</h3>
                     <ul id="task-categories-list">
-                        <!-- Bude naplněno dynamicky -->
-                    </ul>
+                        </ul>
                     <div class="add-category">
                         <input type="text" id="new-task-category" placeholder="Nová kategorie úkolu">
                         <button id="add-task-category">Přidat</button>
                     </div>
                 </div>
-                
+
                 <div class="category-section">
                     <h3>Kategorie výdajů</h3>
                     <ul id="expense-categories-list">
-                        <!-- Bude naplněno dynamicky -->
-                    </ul>
+                        </ul>
                     <div class="add-category">
                         <input type="text" id="new-expense-category" placeholder="Nová kategorie výdajů">
                         <button id="add-expense-category">Přidat</button>
                     </div>
                 </div>
             </div>
-            
+
             <div class="rent-settings">
                 <h3>Nastavení nájmu</h3>
                 <div class="form-row">
