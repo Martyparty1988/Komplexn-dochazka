@@ -9,15 +9,30 @@ document.addEventListener('DOMContentLoaded', () => {
     const timerActivityDisplay = document.getElementById('timer-activity-display');
 
     const manualEntryForm = document.getElementById('manual-entry-form');
+    const editLogIdInput = document.getElementById('edit-log-id');
+    const saveLogButton = document.getElementById('save-log-button');
+    const cancelEditButton = document.getElementById('cancel-edit-button');
     const manualActivitySelect = document.getElementById('manual-activity');
     const workLogsTableBody = document.getElementById('work-logs-table');
 
     const financeForm = document.getElementById('finance-form');
+    const editFinanceIdInput = document.getElementById('edit-finance-id');
+    const saveFinanceButton = document.getElementById('save-finance-button');
+    const cancelFinanceEditButton = document.getElementById('cancel-finance-edit-button');
     const financeTableBody = document.getElementById('finance-table');
 
+    const deductionsSummaryTableBody = document.getElementById('deductions-summary-table');
+
     const debtForm = document.getElementById('debt-form');
-    const paymentForm = document.getElementById('payment-form');
+    const editDebtIdInput = document.getElementById('edit-debt-id');
+    const saveDebtButton = document.getElementById('save-debt-button');
+    const cancelDebtEditButton = document.getElementById('cancel-debt-edit-button');
     const debtsListDiv = document.getElementById('debts-list');
+
+    const paymentForm = document.getElementById('payment-form');
+    const editPaymentIdInput = document.getElementById('edit-payment-id');
+    const savePaymentButton = document.getElementById('save-payment-button');
+    const cancelPaymentEditButton = document.getElementById('cancel-payment-edit-button');
 
     const taskCategoriesList = document.getElementById('task-categories-list');
     const addTaskCategoryButton = document.getElementById('add-task-category');
@@ -33,6 +48,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
     const exportWorkLogsButton = document.getElementById('export-work-logs');
     const exportFinanceButton = document.getElementById('export-finance');
+    const exportDeductionsButton = document.getElementById('export-deductions');
     const exportDebtsButton = document.getElementById('export-debts');
 
     // Globální proměnné
@@ -44,6 +60,12 @@ document.addEventListener('DOMContentLoaded', () => {
     const hourlyRates = {
         maru: 275,
         marty: 400
+    };
+
+    // Srážky - konstanty
+    const deductionRates = {
+        maru: 1/3, // 33.33%
+        marty: 0.5  // 50%
     };
 
     // --- Local Storage ---
@@ -86,6 +108,11 @@ document.addEventListener('DOMContentLoaded', () => {
         localStorage.setItem('timerIsRunning', isRunning.toString());
         localStorage.setItem('currentTimerPerson', person);
         localStorage.setItem('currentTimerActivity', activity);
+    };
+
+    // Výpočet srážky
+    const calculateDeduction = (earnings, person) => {
+        return earnings * deductionRates[person];
     };
 
     // Aktualizace časovače
@@ -251,6 +278,9 @@ document.addEventListener('DOMContentLoaded', () => {
             const startTimeObj = new Date(timerState.startTime);
             const now = new Date();
             const dateString = `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}-${String(now.getDate()).padStart(2, '0')}`;
+            
+            const earnings = (durationInMinutes / 60) * hourlyRates[currentPerson];
+            const deduction = calculateDeduction(earnings, currentPerson);
 
             workLogs.push({
                 id: Date.now().toString(),
@@ -260,7 +290,8 @@ document.addEventListener('DOMContentLoaded', () => {
                 end: `${String(endTime.getHours()).padStart(2, '0')}:${String(endTime.getMinutes()).padStart(2, '0')}`,
                 break: 0,
                 worked: durationInMinutes,
-                earnings: (durationInMinutes / 60) * hourlyRates[currentPerson],
+                earnings: earnings,
+                deduction: deduction,
                 activity: currentActivity
             });
             
@@ -270,6 +301,7 @@ document.addEventListener('DOMContentLoaded', () => {
             saveTimerState(null, null, false, currentPerson, currentActivity);
             
             renderWorkLogs();
+            renderDeductionsSummary();
             
             timerStartButton.disabled = false;
             timerPauseButton.disabled = true;
@@ -424,26 +456,100 @@ document.addEventListener('DOMContentLoaded', () => {
             populateActivitySelects();
         }
 
-        // Přidat nový záznam
-        workLogs.push({
-            id: Date.now().toString(),
-            person,
-            date,
-            start: startTimeStr,
-            end: endTimeStr,
-            break: breakTime,
-            worked: durationInMinutes,
-            earnings: (durationInMinutes / 60) * hourlyRates[person],
-            activity
-        });
+        const earnings = (durationInMinutes / 60) * hourlyRates[person];
+        const deduction = calculateDeduction(earnings, person);
+
+        const editId = editLogIdInput.value;
+        
+        if (editId) {
+            // Editace existujícího záznamu
+            const logIndex = workLogs.findIndex(log => log.id === editId);
+            if (logIndex !== -1) {
+                workLogs[logIndex] = {
+                    ...workLogs[logIndex],
+                    person,
+                    date,
+                    start: startTimeStr,
+                    end: endTimeStr,
+                    break: breakTime,
+                    worked: durationInMinutes,
+                    earnings: earnings,
+                    deduction: deduction,
+                    activity
+                };
+            }
+            
+            // Resetovat formulář pro přidání nového záznamu
+            saveLogButton.textContent = 'Přidat výkaz';
+            cancelEditButton.style.display = 'none';
+            editLogIdInput.value = '';
+        } else {
+            // Přidat nový záznam
+            workLogs.push({
+                id: Date.now().toString(),
+                person,
+                date,
+                start: startTimeStr,
+                end: endTimeStr,
+                break: breakTime,
+                worked: durationInMinutes,
+                earnings: earnings,
+                deduction: deduction,
+                activity
+            });
+        }
         
         saveData({ workLogs, finances, debts, rentSettings, taskCategories, expenseCategories });
         renderWorkLogs();
+        renderDeductionsSummary();
         manualEntryForm.reset();
         
         // Nastavit dnešní datum
         document.getElementById('manual-date').valueAsDate = new Date();
     });
+
+    // Zrušení editace výkazu
+    if (cancelEditButton) {
+        cancelEditButton.addEventListener('click', (e) => {
+            e.preventDefault();
+            saveLogButton.textContent = 'Přidat výkaz';
+            cancelEditButton.style.display = 'none';
+            editLogIdInput.value = '';
+            manualEntryForm.reset();
+            document.getElementById('manual-date').valueAsDate = new Date();
+        });
+    }
+
+    // --- Editace výkazu ---
+    const editWorkLog = (id) => {
+        const log = workLogs.find(log => log.id === id);
+        if (!log) return;
+        
+        // Naplnit formulář daty
+        document.getElementById('manual-person').value = log.person;
+        document.getElementById('manual-date').value = log.date;
+        document.getElementById('manual-start-time').value = log.start;
+        document.getElementById('manual-end-time').value = log.end;
+        document.getElementById('manual-break-time').value = log.break;
+        
+        // Nastavit aktivitu, pokud existuje
+        if (manualActivitySelect && log.activity) {
+            for (let i = 0; i < manualActivitySelect.options.length; i++) {
+                if (manualActivitySelect.options[i].value === log.activity) {
+                    manualActivitySelect.selectedIndex = i;
+                    break;
+                }
+            }
+        }
+        
+        // Nastavit ID editovaného záznamu a změnit text tlačítka
+        editLogIdInput.value = id;
+        saveLogButton.textContent = 'Uložit změny';
+        cancelEditButton.style.display = 'block';
+        
+        // Přeskrolovat na formulář
+        manualEntryForm.scrollIntoView({ behavior: 'smooth' });
+    };
 
     // --- Smazání výkazu ---
     const deleteWorkLog = (id) => {
@@ -453,6 +559,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 workLogs.splice(index, 1);
                 saveData({ workLogs, finances, debts, rentSettings, taskCategories, expenseCategories });
                 renderWorkLogs();
+                renderDeductionsSummary();
             }
         }
     };
@@ -478,10 +585,29 @@ document.addEventListener('DOMContentLoaded', () => {
             row.insertCell().textContent = log.break;
             row.insertCell().textContent = `${Math.floor(log.worked / 60)}:${String(log.worked % 60).padStart(2, '0')}`;
             row.insertCell().textContent = `${log.earnings.toFixed(2)} CZK`;
+            
+            // Přidat sloupec srážek - pokud neexistuje, přidat výchozí hodnotu
+            const deduction = log.deduction || calculateDeduction(log.earnings, log.person);
+            row.insertCell().textContent = `${deduction.toFixed(2)} CZK`;
+            
             row.insertCell().textContent = log.activity || '';
 
+            // Tlačítka pro akce
+            const actionsCell = row.insertCell();
+            const actionsDiv = document.createElement('div');
+            actionsDiv.className = 'action-buttons';
+            
+            // Tlačítko pro editaci
+            const editButton = document.createElement('button');
+            editButton.innerHTML = '<i class="fas fa-edit"></i>';
+            editButton.className = 'edit-btn';
+            editButton.setAttribute('aria-label', 'Upravit záznam');
+            editButton.addEventListener('click', (e) => {
+                e.preventDefault();
+                editWorkLog(log.id);
+            });
+            
             // Tlačítko pro smazání
-            const deleteCell = row.insertCell();
             const deleteButton = document.createElement('button');
             deleteButton.innerHTML = '<i class="fas fa-trash"></i>';
             deleteButton.className = 'delete-btn';
@@ -490,8 +616,61 @@ document.addEventListener('DOMContentLoaded', () => {
                 e.preventDefault();
                 deleteWorkLog(log.id);
             });
-            deleteCell.appendChild(deleteButton);
+            
+            actionsDiv.appendChild(editButton);
+            actionsDiv.appendChild(deleteButton);
+            actionsCell.appendChild(actionsDiv);
         });
+    };
+
+    // --- Vykreslení přehledu srážek ---
+    const renderDeductionsSummary = () => {
+        if (!deductionsSummaryTableBody) return;
+        
+        deductionsSummaryTableBody.innerHTML = '';
+        
+        // Seskupit data podle osoby a měsíce
+        const deductionsByPersonMonth = {};
+        
+        workLogs.forEach(log => {
+            const date = new Date(log.date);
+            const yearMonth = `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, '0')}`;
+            const key = `${log.person}-${yearMonth}`;
+            
+            if (!deductionsByPersonMonth[key]) {
+                deductionsByPersonMonth[key] = {
+                    person: log.person,
+                    yearMonth: yearMonth,
+                    monthName: new Date(log.date).toLocaleString('cs-CZ', { month: 'long', year: 'numeric' }),
+                    totalWorked: 0,
+                    totalEarnings: 0,
+                    totalDeduction: 0
+                };
+            }
+            
+            deductionsByPersonMonth[key].totalWorked += log.worked;
+            deductionsByPersonMonth[key].totalEarnings += log.earnings;
+            
+            // Použít uloženou hodnotu srážky, nebo ji vypočítat
+            const deduction = log.deduction || calculateDeduction(log.earnings, log.person);
+            deductionsByPersonMonth[key].totalDeduction += deduction;
+        });
+        
+        // Zobrazit přehled srážek podle měsíců
+        Object.values(deductionsByPersonMonth)
+            .sort((a, b) => b.yearMonth.localeCompare(a.yearMonth)) // Nejnovější první
+            .forEach(summary => {
+                const row = deductionsSummaryTableBody.insertRow();
+                row.insertCell().textContent = summary.person === 'maru' ? 'Maru' : 'Marty';
+                row.insertCell().textContent = summary.monthName;
+                
+                const hoursWorked = Math.floor(summary.totalWorked / 60);
+                const minutesWorked = summary.totalWorked % 60;
+                row.insertCell().textContent = `${hoursWorked}:${String(minutesWorked).padStart(2, '0')}`;
+                
+                row.insertCell().textContent = `${summary.totalEarnings.toFixed(2)} CZK`;
+                row.insertCell().textContent = `${summary.totalDeduction.toFixed(2)} CZK`;
+            });
     };
 
     // --- Finance ---
@@ -517,16 +696,39 @@ document.addEventListener('DOMContentLoaded', () => {
             populateActivitySelects();
         }
 
-        // Přidat nový záznam
-        finances.push({ 
-            id: Date.now().toString(),
-            type, 
-            description, 
-            amount, 
-            currency, 
-            date,
-            category
-        });
+        const editId = editFinanceIdInput.value;
+        
+        if (editId) {
+            // Editace existujícího záznamu
+            const financeIndex = finances.findIndex(finance => finance.id === editId);
+            if (financeIndex !== -1) {
+                finances[financeIndex] = {
+                    ...finances[financeIndex],
+                    type,
+                    description,
+                    amount,
+                    currency,
+                    date,
+                    category
+                };
+            }
+            
+            // Resetovat formulář pro přidání nového záznamu
+            saveFinanceButton.textContent = 'Přidat';
+            cancelFinanceEditButton.style.display = 'none';
+            editFinanceIdInput.value = '';
+        } else {
+            // Přidat nový záznam
+            finances.push({ 
+                id: Date.now().toString(),
+                type, 
+                description, 
+                amount, 
+                currency, 
+                date,
+                category
+            });
+        }
         
         saveData({ workLogs, finances, debts, rentSettings, taskCategories, expenseCategories });
         renderFinances();
@@ -535,6 +737,50 @@ document.addEventListener('DOMContentLoaded', () => {
         // Nastavit dnešní datum
         document.getElementById('finance-date').valueAsDate = new Date();
     });
+
+    // Zrušení editace finance
+    if (cancelFinanceEditButton) {
+        cancelFinanceEditButton.addEventListener('click', (e) => {
+            e.preventDefault();
+            saveFinanceButton.textContent = 'Přidat';
+            cancelFinanceEditButton.style.display = 'none';
+            editFinanceIdInput.value = '';
+            financeForm.reset();
+            document.getElementById('finance-date').valueAsDate = new Date();
+        });
+    }
+
+    // --- Editace finance ---
+    const editFinance = (id) => {
+        const finance = finances.find(finance => finance.id === id);
+        if (!finance) return;
+        
+        // Naplnit formulář daty
+        document.getElementById('finance-type').value = finance.type;
+        document.getElementById('finance-description').value = finance.description;
+        document.getElementById('finance-amount').value = finance.amount;
+        document.getElementById('finance-currency').value = finance.currency;
+        document.getElementById('finance-date').value = finance.date;
+        
+        // Nastavit kategorii, pokud existuje
+        const financeCategorySelect = document.getElementById('finance-category');
+        if (financeCategorySelect && finance.category) {
+            for (let i = 0; i < financeCategorySelect.options.length; i++) {
+                if (financeCategorySelect.options[i].value === finance.category) {
+                    financeCategorySelect.selectedIndex = i;
+                    break;
+                }
+            }
+        }
+        
+        // Nastavit ID editovaného záznamu a změnit text tlačítka
+        editFinanceIdInput.value = id;
+        saveFinanceButton.textContent = 'Uložit změny';
+        cancelFinanceEditButton.style.display = 'block';
+        
+        // Přeskrolovat na formulář
+        financeForm.scrollIntoView({ behavior: 'smooth' });
+    };
 
     // --- Smazání finančního záznamu ---
     const deleteFinance = (id) => {
@@ -569,8 +815,22 @@ document.addEventListener('DOMContentLoaded', () => {
             row.insertCell().textContent = finance.date;
             row.insertCell().textContent = finance.category || '';
 
+            // Tlačítka pro akce
+            const actionsCell = row.insertCell();
+            const actionsDiv = document.createElement('div');
+            actionsDiv.className = 'action-buttons';
+            
+            // Tlačítko pro editaci
+            const editButton = document.createElement('button');
+            editButton.innerHTML = '<i class="fas fa-edit"></i>';
+            editButton.className = 'edit-btn';
+            editButton.setAttribute('aria-label', 'Upravit záznam');
+            editButton.addEventListener('click', (e) => {
+                e.preventDefault();
+                editFinance(finance.id);
+            });
+            
             // Tlačítko pro smazání
-            const deleteCell = row.insertCell();
             const deleteButton = document.createElement('button');
             deleteButton.innerHTML = '<i class="fas fa-trash"></i>';
             deleteButton.className = 'delete-btn';
@@ -579,7 +839,10 @@ document.addEventListener('DOMContentLoaded', () => {
                 e.preventDefault();
                 deleteFinance(finance.id);
             });
-            deleteCell.appendChild(deleteButton);
+            
+            actionsDiv.appendChild(editButton);
+            actionsDiv.appendChild(deleteButton);
+            actionsCell.appendChild(actionsDiv);
         });
     };
 
@@ -620,21 +883,73 @@ document.addEventListener('DOMContentLoaded', () => {
             return;
         }
 
-        // Přidat nový dluh
-        debts.push({ 
-            id: Date.now().toString(),
-            person, 
-            description, 
-            amount, 
-            currency, 
-            paid: 0 
-        });
+        const editId = editDebtIdInput.value;
+        
+        if (editId) {
+            // Editace existujícího záznamu
+            const debtIndex = debts.findIndex(debt => debt.id === editId);
+            if (debtIndex !== -1) {
+                debts[debtIndex] = {
+                    ...debts[debtIndex],
+                    person,
+                    description,
+                    amount,
+                    currency
+                };
+            }
+            
+            // Resetovat formulář pro přidání nového záznamu
+            saveDebtButton.textContent = 'Přidat dluh';
+            cancelDebtEditButton.style.display = 'none';
+            editDebtIdInput.value = '';
+        } else {
+            // Přidat nový dluh
+            debts.push({ 
+                id: Date.now().toString(),
+                person, 
+                description, 
+                amount, 
+                currency, 
+                paid: 0 
+            });
+        }
         
         saveData({ workLogs, finances, debts, rentSettings, taskCategories, expenseCategories });
         renderDebts();
         populateDebtSelect();
         debtForm.reset();
     });
+
+    // Zrušení editace dluhu
+    if (cancelDebtEditButton) {
+        cancelDebtEditButton.addEventListener('click', (e) => {
+            e.preventDefault();
+            saveDebtButton.textContent = 'Přidat dluh';
+            cancelDebtEditButton.style.display = 'none';
+            editDebtIdInput.value = '';
+            debtForm.reset();
+        });
+    }
+
+    // --- Editace dluhu ---
+    const editDebt = (id) => {
+        const debt = debts.find(debt => debt.id === id);
+        if (!debt) return;
+        
+        // Naplnit formulář daty
+        document.getElementById('debt-person').value = debt.person;
+        document.getElementById('debt-description').value = debt.description;
+        document.getElementById('debt-amount').value = debt.amount;
+        document.getElementById('debt-currency').value = debt.currency;
+        
+        // Nastavit ID editovaného záznamu a změnit text tlačítka
+        editDebtIdInput.value = id;
+        saveDebtButton.textContent = 'Uložit změny';
+        cancelDebtEditButton.style.display = 'block';
+        
+        // Přeskrolovat na formulář
+        debtForm.scrollIntoView({ behavior: 'smooth' });
+    };
 
     // Aktualizovat seznam dluhů při změně osoby
     if (document.getElementById('payment-person')) {
@@ -655,21 +970,63 @@ document.addEventListener('DOMContentLoaded', () => {
             return;
         }
 
-        // Přidat záznam do financí
-        finances.push({ 
-            id: Date.now().toString(),
-            type: 'expense', 
-            description: `Splátka dluhu: ${description}`, 
-            amount, 
-            currency, 
-            date: new Date().toISOString().slice(0, 10) 
-        });
+        const editId = editPaymentIdInput.value;
+        let oldDebtId = '';
+        let oldAmount = 0;
+        
+        if (editId) {
+            // Editace existující splátky - najít původní záznam
+            const paymentIndex = finances.findIndex(f => f.id === editId);
+            if (paymentIndex !== -1) {
+                // Uložit původní hodnoty pro aktualizaci dluhu
+                oldDebtId = finances[paymentIndex].debtId;
+                oldAmount = finances[paymentIndex].amount;
+                
+                // Pokud se mění dluh, odečíst splátku od původního dluhu
+                if (oldDebtId && oldDebtId !== debtId) {
+                    const oldDebt = debts.find(d => d.id === oldDebtId);
+                    if (oldDebt) {
+                        oldDebt.paid = Math.max(0, (oldDebt.paid || 0) - oldAmount);
+                    }
+                }
+                
+                // Aktualizovat záznam splátky
+                finances[paymentIndex] = {
+                    ...finances[paymentIndex],
+                    description,
+                    amount,
+                    currency,
+                    debtId: debtId
+                };
+            }
+            
+            // Resetovat formulář pro přidání nové splátky
+            savePaymentButton.textContent = 'Přidat splátku';
+            cancelPaymentEditButton.style.display = 'none';
+            editPaymentIdInput.value = '';
+        } else {
+            // Přidat nový záznam do financí
+            finances.push({ 
+                id: Date.now().toString(),
+                type: 'expense', 
+                description: `Splátka dluhu: ${description}`, 
+                amount, 
+                currency, 
+                date: new Date().toISOString().slice(0, 10),
+                debtId: debtId
+            });
+        }
         
         // Aktualizovat splátku v dluhu
         if (debtId) {
             const debt = debts.find(d => d.id === debtId);
             if (debt) {
-                debt.paid = (debt.paid || 0) + amount;
+                // Pokud jde o editaci, přidat jen rozdíl ve splátce
+                if (editId && oldDebtId === debtId) {
+                    debt.paid = (debt.paid || 0) - oldAmount + amount;
+                } else {
+                    debt.paid = (debt.paid || 0) + amount;
+                }
             }
         }
         
@@ -680,14 +1037,73 @@ document.addEventListener('DOMContentLoaded', () => {
         paymentForm.reset();
     });
 
+    // Zrušení editace splátky
+    if (cancelPaymentEditButton) {
+        cancelPaymentEditButton.addEventListener('click', (e) => {
+            e.preventDefault();
+            savePaymentButton.textContent = 'Přidat splátku';
+            cancelPaymentEditButton.style.display = 'none';
+            editPaymentIdInput.value = '';
+            paymentForm.reset();
+        });
+    }
+
+    // --- Editace splátky ---
+    const editPayment = (id) => {
+        const payment = finances.find(f => f.id === id && f.type === 'expense' && f.description.startsWith('Splátka dluhu:'));
+        if (!payment) return;
+        
+        // Naplnit formulář daty
+        document.getElementById('payment-person').value = payment.person || 'maru'; // Výchozí hodnota, pokud není nastaveno
+        document.getElementById('payment-description').value = payment.description.replace('Splátka dluhu: ', '');
+        document.getElementById('payment-amount').value = payment.amount;
+        document.getElementById('payment-currency').value = payment.currency;
+        
+        // Aktualizovat seznam dluhů a vybrat správný dluh
+        populateDebtSelect();
+        if (payment.debtId) {
+            const debtSelect = document.getElementById('payment-debt-id');
+            if (debtSelect) {
+                setTimeout(() => { // Dát čas na aktualizaci seznamu
+                    for (let i = 0; i < debtSelect.options.length; i++) {
+                        if (debtSelect.options[i].value === payment.debtId) {
+                            debtSelect.selectedIndex = i;
+                            break;
+                        }
+                    }
+                }, 100);
+            }
+        }
+        
+        // Nastavit ID editovaného záznamu a změnit text tlačítka
+        editPaymentIdInput.value = id;
+        savePaymentButton.textContent = 'Uložit změny';
+        cancelPaymentEditButton.style.display = 'block';
+        
+        // Přeskrolovat na formulář
+        paymentForm.scrollIntoView({ behavior: 'smooth' });
+    };
+
     // --- Smazání dluhu ---
     const deleteDebt = (id) => {
         const index = debts.findIndex(debt => debt.id === id);
         if (index !== -1) {
             if (confirm('Opravdu chcete smazat tento dluh?')) {
+                // Také smazat splátky tohoto dluhu
+                const paymentsToRemove = finances.filter(f => f.debtId === id);
+                if (paymentsToRemove.length > 0 && !confirm(`Tento dluh má ${paymentsToRemove.length} splátk${paymentsToRemove.length > 1 ? 'y' : 'u'}. Opravdu chcete smazat dluh i všechny jeho splátky?`)) {
+                    return;
+                }
+                
+                // Smazat dluh
                 debts.splice(index, 1);
+                
+                // Smazat splátky tohoto dluhu
+                finances = finances.filter(f => f.debtId !== id);
+                
                 saveData({ workLogs, finances, debts, rentSettings, taskCategories, expenseCategories });
                 renderDebts();
+                renderFinances();
                 populateDebtSelect();
             }
         }
@@ -697,66 +1113,74 @@ document.addEventListener('DOMContentLoaded', () => {
     const renderDebts = () => {
         debtsListDiv.innerHTML = '';
         
-        // Vytvořit objekt seskupený podle osob a měn
-        const debtsByPerson = {};
+        // Seskupit dluhy podle měny (bez rozdělení na osoby)
+        const debtsByCurrency = {};
+        
         debts.forEach(debt => {
-            if (!debtsByPerson[debt.person]) {
-                debtsByPerson[debt.person] = {};
+            if (!debtsByCurrency[debt.currency]) {
+                debtsByCurrency[debt.currency] = [];
             }
-            if (!debtsByPerson[debt.person][debt.currency]) {
-                debtsByPerson[debt.person][debt.currency] = [];
-            }
-            debtsByPerson[debt.person][debt.currency].push(debt);
+            debtsByCurrency[debt.currency].push(debt);
         });
 
-        // Vykreslit dluhy pro každou osobu a měnu
-        for (const person in debtsByPerson) {
-            const personDiv = document.createElement('div');
-            personDiv.className = 'debt-person';
-            personDiv.innerHTML = `<h3>${person === 'maru' ? 'Maru' : 'Marty'}</h3>`;
+        // Vykreslit dluhy pro každou měnu
+        for (const currency in debtsByCurrency) {
+            const currencyDiv = document.createElement('div');
+            currencyDiv.className = 'debt-currency';
+            currencyDiv.innerHTML = `<h4>${currency}</h4><ul class="debts-list"></ul>`;
+            const ul = currencyDiv.querySelector('ul');
             
-            for (const currency in debtsByPerson[person]) {
-                const currencyDiv = document.createElement('div');
-                currencyDiv.className = 'debt-currency';
-                currencyDiv.innerHTML = `<h4>${currency}</h4><ul class="debts-list"></ul>`;
-                const ul = currencyDiv.querySelector('ul');
+            let totalDebt = 0;
+            let totalPaid = 0;
+            
+            debtsByCurrency[currency].forEach(debt => {
+                const li = document.createElement('li');
+                li.dataset.id = debt.id;
                 
-                let totalDebt = 0;
-                let totalPaid = 0;
+                const remaining = debt.amount - (debt.paid || 0);
+                const personName = debt.person === 'maru' ? 'Maru' : 'Marty';
+                li.innerHTML = `<span>${personName}: ${debt.description}: ${debt.amount} ${debt.currency} (Zbývá: ${remaining.toFixed(2)} ${debt.currency})</span>`;
                 
-                debtsByPerson[person][currency].forEach(debt => {
-                    const li = document.createElement('li');
-                    li.dataset.id = debt.id;
-                    
-                    const remaining = debt.amount - (debt.paid || 0);
-                    li.innerHTML = `<span>${debt.description}: ${debt.amount} ${debt.currency} (Zbývá: ${remaining.toFixed(2)} ${debt.currency})</span>`;
-                    
-                    // Tlačítko pro smazání
-                    const deleteButton = document.createElement('button');
-                    deleteButton.innerHTML = '<i class="fas fa-trash"></i>';
-                    deleteButton.className = 'delete-btn';
-                    deleteButton.setAttribute('aria-label', 'Smazat dluh');
-                    deleteButton.addEventListener('click', (e) => {
-                        e.preventDefault();
-                        deleteDebt(debt.id);
-                    });
-                    li.appendChild(deleteButton);
-                    
-                    ul.appendChild(li);
-                    totalDebt += debt.amount;
-                    totalPaid += (debt.paid || 0);
+                // Tlačítka pro akce
+                const actionsDiv = document.createElement('div');
+                actionsDiv.className = 'action-buttons';
+                
+                // Tlačítko pro editaci
+                const editButton = document.createElement('button');
+                editButton.innerHTML = '<i class="fas fa-edit"></i>';
+                editButton.className = 'edit-btn';
+                editButton.setAttribute('aria-label', 'Upravit dluh');
+                editButton.addEventListener('click', (e) => {
+                    e.preventDefault();
+                    editDebt(debt.id);
                 });
                 
-                const totalRemainingDebt = totalDebt - totalPaid;
-                const totalLi = document.createElement('li');
-                totalLi.className = 'debt-total';
-                totalLi.innerHTML = `<strong>Celkem: ${totalDebt.toFixed(2)} ${currency} (Zbývá: ${totalRemainingDebt.toFixed(2)} ${currency})</strong>`;
-                ul.appendChild(totalLi);
+                // Tlačítko pro smazání
+                const deleteButton = document.createElement('button');
+                deleteButton.innerHTML = '<i class="fas fa-trash"></i>';
+                deleteButton.className = 'delete-btn';
+                deleteButton.setAttribute('aria-label', 'Smazat dluh');
+                deleteButton.addEventListener('click', (e) => {
+                    e.preventDefault();
+                    deleteDebt(debt.id);
+                });
                 
-                personDiv.appendChild(currencyDiv);
-            }
+                actionsDiv.appendChild(editButton);
+                actionsDiv.appendChild(deleteButton);
+                li.appendChild(actionsDiv);
+                
+                ul.appendChild(li);
+                totalDebt += debt.amount;
+                totalPaid += (debt.paid || 0);
+            });
             
-            debtsListDiv.appendChild(personDiv);
+            const totalRemainingDebt = totalDebt - totalPaid;
+            const totalLi = document.createElement('li');
+            totalLi.className = 'debt-total';
+            totalLi.innerHTML = `<strong>Celkem: ${totalDebt.toFixed(2)} ${currency} (Zbývá: ${totalRemainingDebt.toFixed(2)} ${currency})</strong>`;
+            ul.appendChild(totalLi);
+            
+            debtsListDiv.appendChild(currencyDiv);
         }
     };
 
@@ -881,12 +1305,15 @@ document.addEventListener('DOMContentLoaded', () => {
 
     // --- Export dat ---
     const exportToCSV = (filename, rows) => {
+        // Pro Apple Numbers - BOM (Byte Order Mark) na začátku
+        const bom = "\uFEFF";
+        
         const processRow = function (row) {
             const finalVal = [];
             for (let j = 0; j < row.length; j++) {
                 let innerValue = row[j] === null ? '' : row[j].toString();
                 if (row[j] instanceof Date) {
-                    innerValue = row[j].toLocaleString();
+                    innerValue = row[j].toLocaleString('cs-CZ');
                 };
                 let result = innerValue.replace(/"/g, '""');
                 if (result.search(/("|,|\n)/g) >= 0)
@@ -896,7 +1323,7 @@ document.addEventListener('DOMContentLoaded', () => {
             return finalVal.join(',');
         };
 
-        let csvFile = '';
+        let csvFile = bom; // Přidat BOM na začátek pro lepší kompatibilitu
         for (let i = 0; i < rows.length; i++) {
             csvFile += processRow(rows[i]) + '\n';
         }
@@ -927,17 +1354,21 @@ document.addEventListener('DOMContentLoaded', () => {
     if (exportWorkLogsButton) {
         exportWorkLogsButton.addEventListener('click', (e) => {
             e.preventDefault();
-            const header = ['Osoba', 'Datum', 'Začátek', 'Konec', 'Pauza', 'Odpracováno (min)', 'Výdělek (CZK)', 'Úkol'];
-            const data = workLogs.map(log => [
-                log.person === 'maru' ? 'Maru' : 'Marty',
-                log.date,
-                log.start,
-                log.end,
-                log.break,
-                log.worked,
-                log.earnings.toFixed(2),
-                log.activity || ''
-            ]);
+            const header = ['Osoba', 'Datum', 'Začátek', 'Konec', 'Pauza', 'Odpracováno (min)', 'Výdělek (CZK)', 'Srážka (CZK)', 'Úkol'];
+            const data = workLogs.map(log => {
+                const deduction = log.deduction || calculateDeduction(log.earnings, log.person);
+                return [
+                    log.person === 'maru' ? 'Maru' : 'Marty',
+                    log.date,
+                    log.start,
+                    log.end,
+                    log.break,
+                    log.worked,
+                    log.earnings.toFixed(2),
+                    deduction.toFixed(2),
+                    log.activity || ''
+                ];
+            });
             exportToCSV('work_logs.csv', [header, ...data]);
         });
     }
@@ -955,6 +1386,50 @@ document.addEventListener('DOMContentLoaded', () => {
                 finance.category || ''
             ]);
             exportToCSV('finance.csv', [header, ...data]);
+        });
+    }
+
+    if (exportDeductionsButton) {
+        exportDeductionsButton.addEventListener('click', (e) => {
+            e.preventDefault();
+            // Příprava dat pro export
+            const deductionsByPersonMonth = {};
+        
+            workLogs.forEach(log => {
+                const date = new Date(log.date);
+                const yearMonth = `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, '0')}`;
+                const key = `${log.person}-${yearMonth}`;
+                
+                if (!deductionsByPersonMonth[key]) {
+                    deductionsByPersonMonth[key] = {
+                        person: log.person,
+                        yearMonth: yearMonth,
+                        monthName: new Date(log.date).toLocaleString('cs-CZ', { month: 'long', year: 'numeric' }),
+                        totalWorked: 0,
+                        totalEarnings: 0,
+                        totalDeduction: 0
+                    };
+                }
+                
+                deductionsByPersonMonth[key].totalWorked += log.worked;
+                deductionsByPersonMonth[key].totalEarnings += log.earnings;
+                
+                const deduction = log.deduction || calculateDeduction(log.earnings, log.person);
+                deductionsByPersonMonth[key].totalDeduction += deduction;
+            });
+            
+            const header = ['Osoba', 'Měsíc', 'Celkem odpracováno (min)', 'Celkový výdělek (CZK)', 'Srážka (CZK)'];
+            const data = Object.values(deductionsByPersonMonth)
+                .sort((a, b) => b.yearMonth.localeCompare(a.yearMonth))
+                .map(summary => [
+                    summary.person === 'maru' ? 'Maru' : 'Marty',
+                    summary.monthName,
+                    summary.totalWorked,
+                    summary.totalEarnings.toFixed(2),
+                    summary.totalDeduction.toFixed(2)
+                ]);
+                
+            exportToCSV('deductions.csv', [header, ...data]);
         });
     }
 
@@ -1083,6 +1558,7 @@ document.addEventListener('DOMContentLoaded', () => {
     renderWorkLogs();
     renderFinances();
     renderDebts();
+    renderDeductionsSummary();
     renderCategories();
     populateActivitySelects();
     populateDebtSelect();
