@@ -9,6 +9,7 @@
 html {
     font-size: 16px;
     -webkit-text-size-adjust: 100%;
+    scroll-padding-top: 70px; /* Pro fixní header */
 }
 
 body {
@@ -19,83 +20,133 @@ body {
     min-height: 100vh;
     display: flex;
     flex-direction: column;
-    padding-top: env(safe-area-inset-top);
-    padding-bottom: env(safe-area-inset-bottom, 0);
+    padding-top: 70px; /* Pro fixní header */
 }
 
-/* Header */
-header {
+/* Fixní horní lišta */
+.main-header {
     background-color: #4a6da7;
     color: white;
-    padding: 1rem;
-    padding-top: max(1rem, env(safe-area-inset-top));
-    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
-    position: sticky;
+    padding: 0.5rem 1rem;
+    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.2);
+    position: fixed;
     top: 0;
-    z-index: 100;
+    left: 0;
+    right: 0;
+    z-index: 1000;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    height: 60px;
 }
 
-header h1 {
-    margin-bottom: 0.5rem;
-    font-size: 1.5rem;
+.header-left h1 {
+    font-size: 1.2rem;
     font-weight: 600;
+    white-space: nowrap;
 }
 
-nav ul {
+.main-nav ul {
     display: flex;
     list-style: none;
     margin: 0;
     padding: 0;
 }
 
-nav ul li {
-    flex: 1;
-    text-align: center;
+.main-nav ul li {
+    margin: 0 5px;
 }
 
-nav ul li a {
+.main-nav ul li a {
     color: white;
     text-decoration: none;
-    padding: 0.5rem 0.3rem;
-    display: block;
+    padding: 0.5rem 0.7rem;
+    display: flex;
+    align-items: center;
     font-weight: 500;
-    font-size: 0.95rem;
-    border-bottom: 2px solid transparent;
-    transition: 0.2s;
+    font-size: 0.9rem;
+    border-radius: 4px;
+    transition: background-color 0.2s;
 }
 
-nav ul li a.active {
-    border-bottom-color: white;
+.main-nav ul li a i {
+    margin-right: 5px;
+}
+
+.main-nav ul li a:hover {
+    background-color: rgba(255, 255, 255, 0.1);
+}
+
+.main-nav ul li a.active {
+    background-color: rgba(255, 255, 255, 0.2);
+}
+
+.header-right {
+    display: flex;
+    align-items: center;
+}
+
+#header-timer {
+    background-color: rgba(0, 0, 0, 0.2);
+    padding: 0.3rem 0.7rem;
+    border-radius: 4px;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-size: 0.9rem;
+}
+
+#header-timer.hidden {
+    display: none;
+}
+
+#header-timer-time {
+    font-weight: bold;
+    font-family: monospace;
+}
+
+#header-timer-person, #header-timer-activity {
+    background-color: rgba(255, 255, 255, 0.1);
+    padding: 0.1rem 0.3rem;
+    border-radius: 3px;
+    font-size: 0.8rem;
 }
 
 /* Main content */
 main {
     flex: 1;
     padding: 1rem;
-    max-width: 100%;
+    max-width: 1200px;
     margin: 0 auto;
     width: 100%;
 }
 
 section {
     display: none;
+    margin-bottom: 2rem;
 }
 
 section.active {
     display: block;
+    animation: fadeIn 0.3s;
+}
+
+@keyframes fadeIn {
+    from { opacity: 0; }
+    to { opacity: 1; }
 }
 
 h2 {
-    margin-bottom: 1rem;
+    margin-bottom: 1.5rem;
     color: #4a6da7;
     border-bottom: 2px solid #e0e0e0;
     padding-bottom: 0.5rem;
-    font-size: 1.4rem;
+    font-size: 1.5rem;
     font-weight: 600;
 }
 
 h3 {
-    margin: 1rem 0 0.7rem;
+    margin: 1.2rem 0 0.8rem;
     color: #2c3e50;
     font-size: 1.2rem;
     font-weight: 600;
@@ -112,7 +163,7 @@ h4 {
     background-color: white;
     border-radius: 12px;
     box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
-    padding: 1.2rem;
+    padding: 1.5rem;
     margin-bottom: 1.5rem;
 }
 
@@ -122,9 +173,9 @@ h4 {
 }
 
 #timer-time {
-    font-size: 2.8rem;
+    font-size: 3rem;
     font-weight: bold;
-    font-family: -apple-system, BlinkMacSystemFont, monospace;
+    font-family: monospace;
     color: #2c3e50;
     line-height: 1.1;
 }
@@ -148,24 +199,30 @@ h4 {
 .timer-controls {
     display: flex;
     flex-direction: column;
-    gap: 0.8rem;
+    gap: 1rem;
 }
 
 .timer-person-select {
     display: flex;
-    gap: 0.5rem;
+    gap: 1rem;
     justify-content: center;
 }
 
 .timer-person-select label {
     display: flex;
     align-items: center;
-    gap: 0.3rem;
-    padding: 0.5rem 1rem;
+    gap: 0.5rem;
+    padding: 0.7rem 1rem;
     background-color: #f5f5f5;
     border-radius: 6px;
     flex: 1;
     justify-content: center;
+    cursor: pointer;
+    transition: background-color 0.2s;
+}
+
+.timer-person-select label:hover {
+    background-color: #e9e9e9;
 }
 
 .timer-person-select input[type="radio"] {
@@ -176,33 +233,24 @@ h4 {
 
 .timer-activity-select {
     width: 100%;
-    margin: 0.3rem 0;
 }
 
 .timer-activity-select select {
     width: 100%;
-    padding: 0.7rem;
+    padding: 0.8rem;
     border: 1px solid #ddd;
     border-radius: 8px;
     background-color: white;
-    font-size: 16px;
-    -webkit-appearance: none;
-    appearance: none;
-    height: 44px;
-    background-image: url("data:image/svg+xml;charset=utf-8,%3Csvg xmlns='http://www.w3.org/2000/svg' width='16' height='16' viewBox='0 0 24 24' fill='none' stroke='%23555' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M6 9l6 6 6-6'/%3E%3C/svg%3E");
-    background-repeat: no-repeat;
-    background-position: right 0.7rem center;
-    background-size: 16px;
 }
 
 .timer-buttons {
     display: flex;
-    gap: 0.5rem;
+    gap: 0.7rem;
 }
 
 .timer-buttons button {
     flex: 1;
-    min-height: 44px;
+    padding: 0.8rem;
 }
 
 /* Forms */
@@ -210,50 +258,46 @@ form {
     background-color: white;
     border-radius: 12px;
     box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
-    padding: 1.2rem;
+    padding: 1.5rem;
     margin-bottom: 1.5rem;
 }
 
-.form-group {
+.form-row {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 1rem;
     margin-bottom: 1rem;
+}
+
+.form-group {
+    flex: 1;
+    min-width: 200px;
 }
 
 label {
     display: block;
-    margin-bottom: 0.3rem;
+    margin-bottom: 0.4rem;
     font-weight: 500;
     color: #555;
 }
 
 input, select {
     width: 100%;
-    padding: 0.7rem;
+    padding: 0.8rem;
     border: 1px solid #ddd;
-    border-radius: 8px;
+    border-radius: 6px;
     font-family: inherit;
-    font-size: 16px;
-    min-height: 44px;
+    font-size: 1rem;
 }
 
-select {
-    -webkit-appearance: none;
-    appearance: none;
-    background-image: url("data:image/svg+xml;charset=utf-8,%3Csvg xmlns='http://www.w3.org/2000/svg' width='16' height='16' viewBox='0 0 24 24' fill='none' stroke='%23555' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M6 9l6 6 6-6'/%3E%3C/svg%3E");
-    background-repeat: no-repeat;
-    background-position: right 0.7rem center;
-    background-size: 16px;
-}
-
-input[type="date"],
-input[type="time"] {
-    min-height: 44px;
-    padding: 0.5rem;
+input:focus, select:focus {
+    outline: none;
+    border-color: #4a6da7;
+    box-shadow: 0 0 0 2px rgba(74, 109, 167, 0.2);
 }
 
 input[type="radio"] {
-    width: 18px;
-    height: 18px;
-    min-height: auto;
+    width: auto;
     margin-right: 0.3rem;
 }
 
@@ -261,15 +305,16 @@ button {
     background-color: #4a6da7;
     color: white;
     border: none;
-    padding: 0.7rem 1rem;
-    border-radius: 8px;
+    padding: 0.8rem 1.2rem;
+    border-radius: 6px;
     cursor: pointer;
-    font-size: 16px;
+    font-size: 1rem;
     font-weight: 500;
-    min-height: 44px;
-    -webkit-appearance: none;
-    appearance: none;
-    touch-action: manipulation;
+    transition: background-color 0.2s;
+}
+
+button:hover {
+    background-color: #3a5a8f;
 }
 
 button:disabled {
@@ -277,8 +322,22 @@ button:disabled {
     cursor: not-allowed;
 }
 
+.form-actions {
+    display: flex;
+    gap: 0.7rem;
+    margin-top: 1.5rem;
+}
+
+.form-actions button {
+    min-width: 120px;
+}
+
 button#timer-start {
     background-color: #28a745;
+}
+
+button#timer-start:hover {
+    background-color: #218838;
 }
 
 button#timer-pause {
@@ -286,27 +345,24 @@ button#timer-pause {
     color: #212529;
 }
 
+button#timer-pause:hover {
+    background-color: #e0a800;
+}
+
 button#timer-stop {
     background-color: #dc3545;
 }
 
-.form-actions {
-    display: flex;
-    gap: 0.5rem;
-    margin-top: 1rem;
-}
-
-.form-actions button {
-    flex: 1;
+button#timer-stop:hover {
+    background-color: #c82333;
 }
 
 button.cancel-button {
     background-color: #6c757d;
 }
 
-form button[type="submit"] {
-    display: block;
-    width: 100%;
+button.cancel-button:hover {
+    background-color: #5a6268;
 }
 
 /* Tables */
@@ -316,18 +372,17 @@ form button[type="submit"] {
     box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
     padding: 1rem;
     overflow-x: auto;
-    -webkit-overflow-scrolling: touch;
     margin-bottom: 1.5rem;
 }
 
 table {
     width: 100%;
     border-collapse: collapse;
-    font-size: 0.9rem;
+    font-size: 0.95rem;
 }
 
 th, td {
-    padding: 0.7rem 0.5rem;
+    padding: 0.8rem 0.6rem;
     text-align: left;
     border-bottom: 1px solid #eee;
 }
@@ -338,11 +393,63 @@ th {
     color: #555;
     position: sticky;
     top: 0;
-    z-index: 10;
+}
+
+thead {
+    border-bottom: 2px solid #e0e0e0;
 }
 
 tbody tr:nth-child(even) {
     background-color: #f9f9f9;
+}
+
+tbody tr:hover {
+    background-color: #f0f4f9;
+}
+
+/* Filters */
+.filters-container {
+    background-color: white;
+    border-radius: 12px;
+    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+    padding: 1.5rem;
+    margin-bottom: 1.5rem;
+}
+
+/* Graph container */
+.graph-container {
+    background-color: white;
+    border-radius: 12px;
+    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+    padding: 1.5rem;
+    margin-bottom: 1.5rem;
+}
+
+#chart-area {
+    height: 400px;
+    position: relative;
+    margin-top: 1rem;
+}
+
+.chart-options {
+    display: flex;
+    gap: 0.7rem;
+    margin-bottom: 1rem;
+}
+
+.chart-options button {
+    background-color: #e9ecef;
+    color: #495057;
+    padding: 0.5rem 1rem;
+}
+
+.chart-options button:hover {
+    background-color: #dde2e6;
+}
+
+.chart-options button.active {
+    background-color: #4a6da7;
+    color: white;
 }
 
 /* Srážky */
@@ -350,14 +457,14 @@ tbody tr:nth-child(even) {
     background-color: white;
     border-radius: 12px;
     box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
-    padding: 1.2rem;
+    padding: 1.5rem;
     margin-bottom: 1.5rem;
 }
 
 .info-box {
     background-color: #e8f4f8;
     border-left: 4px solid #4a6da7;
-    padding: 0.8rem;
+    padding: 1rem;
     margin-bottom: 1rem;
     border-radius: 4px;
 }
@@ -367,16 +474,12 @@ tbody tr:nth-child(even) {
     background-color: white;
     border-radius: 12px;
     box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
-    padding: 1.2rem;
-    margin-bottom: 1.5rem;
-}
-
-.debt-person {
+    padding: 1.5rem;
     margin-bottom: 1.5rem;
 }
 
 .debt-currency {
-    margin-bottom: 1rem;
+    margin-bottom: 1.5rem;
 }
 
 .debts-list {
@@ -393,12 +496,16 @@ tbody tr:nth-child(even) {
     align-items: center;
 }
 
+.debts-list li:last-child {
+    border-bottom: none;
+}
+
 .debts-list li span {
     flex: 1;
 }
 
 .debt-total {
-    font-weight: bold;
+    font-weight: 600;
     color: #2c3e50;
 }
 
@@ -407,7 +514,7 @@ tbody tr:nth-child(even) {
     background-color: white;
     border-radius: 12px;
     box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
-    padding: 1.2rem;
+    padding: 1.5rem;
     margin-bottom: 1.5rem;
 }
 
@@ -427,6 +534,11 @@ tbody tr:nth-child(even) {
     align-items: center;
 }
 
+#task-categories-list li:last-child, 
+#expense-categories-list li:last-child {
+    border-bottom: none;
+}
+
 #task-categories-list li span, 
 #expense-categories-list li span {
     flex: 1;
@@ -442,22 +554,33 @@ tbody tr:nth-child(even) {
     flex: 1;
 }
 
-.rent-settings, .data-export {
+.rent-settings {
     background-color: white;
     border-radius: 12px;
     box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
-    padding: 1.2rem;
+    padding: 1.5rem;
     margin-bottom: 1.5rem;
 }
 
-.data-export {
+.export-actions {
+    background-color: white;
+    border-radius: 12px;
+    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+    padding: 1.5rem;
+    margin-bottom: 1.5rem;
     display: flex;
-    flex-direction: column;
-    gap: 0.8rem;
+    flex-wrap: wrap;
+    gap: 0.7rem;
 }
 
-.data-export button {
+.export-actions h3 {
     width: 100%;
+    margin-top: 0;
+}
+
+.export-actions button {
+    flex: 1;
+    min-width: 200px;
 }
 
 /* Footer */
@@ -466,107 +589,130 @@ footer {
     color: #f8f9fa;
     text-align: center;
     padding: 1rem;
-    padding-bottom: max(1rem, env(safe-area-inset-bottom));
     margin-top: auto;
 }
 
-/* Delete button */
-.delete-btn, .edit-btn {
+/* Buttons */
+.action-buttons {
+    display: flex;
+    gap: 0.3rem;
+}
+
+.edit-btn, .delete-btn {
     background-color: transparent;
-    border: none;
-    padding: 0;
-    border-radius: 50%;
-    width: 36px;
-    height: 36px;
-    min-height: 36px;
+    padding: 0.3rem;
+    border-radius: 4px;
+    min-width: auto;
     display: flex;
     align-items: center;
     justify-content: center;
-}
-
-.delete-btn {
-    color: #dc3545;
 }
 
 .edit-btn {
     color: #4a6da7;
 }
 
-.action-buttons {
-    display: flex;
-    gap: 0.3rem;
+.edit-btn:hover {
+    background-color: rgba(74, 109, 167, 0.1);
 }
 
-/* Offline notifikace */
-.offline-notification {
-    position: fixed;
-    bottom: 20px;
-    left: 50%;
-    transform: translateX(-50%);
-    background-color: #f8d7da;
-    color: #721c24;
-    padding: 10px 20px;
-    border-radius: 10px;
-    box-shadow: 0 3px 10px rgba(0,0,0,0.2);
-    z-index: 1000;
-    display: none;
-    font-weight: 500;
-    text-align: center;
-    max-width: 90%;
-    width: auto;
+.delete-btn {
+    color: #dc3545;
 }
 
-.offline-notification.show {
-    display: block;
-    animation: slideUp 0.3s forwards;
+.delete-btn:hover {
+    background-color: rgba(220, 53, 69, 0.1);
 }
 
-@keyframes slideUp {
-    from { transform: translate(-50%, 100px); opacity: 0; }
-    to { transform: translate(-50%, 0); opacity: 1; }
+/* Responsiveness */
+@media (max-width: 992px) {
+    .main-nav ul li a span {
+        display: none;
+    }
+    
+    .main-nav ul li a i {
+        margin-right: 0;
+        font-size: 1.2rem;
+    }
+    
+    .form-group {
+        min-width: 150px;
+    }
 }
 
-/* iOS specifické styly */
-@supports (-webkit-touch-callout: none) {
+@media (max-width: 768px) {
     body {
-        /* Zabránit pull-to-refresh */
-        overscroll-behavior-y: none;
-    }
-
-    /* Zvětšit některé ovládací prvky pro dotykové použití */
-    button, 
-    select,
-    input[type="date"],
-    input[type="time"] {
-        font-size: 16px;
-        min-height: 44px;
-    }
-
-    /* Odstranit standardní iOS styly */
-    input[type="date"]::-webkit-date-and-time-value,
-    input[type="time"]::-webkit-date-and-time-value {
-        text-align: left;
-    }
-
-    select::-webkit-scrollbar {
-        width: 0;
-        height: 0;
+        padding-top: 110px;
     }
     
-    /* Opravit vzhled selectů v iOS */
-    select {
-        background-position: right 10px center;
-        padding-right: 30px;
+    .main-header {
+        flex-direction: column;
+        height: auto;
+        padding: 0.5rem;
     }
     
-    /* Vylepšit dotyková tlačítka */
-    button:active {
-        opacity: 0.8;
+    .header-left {
+        margin-bottom: 0.3rem;
     }
     
-    /* Opravit menu na iOS */
-    nav ul li a {
-        padding: 0.6rem 0.3rem;
+    .main-nav {
+        width: 100%;
+    }
+    
+    .main-nav ul {
+        justify-content: space-around;
+    }
+    
+    .main-nav ul li {
+        margin: 0;
+    }
+    
+    .main-nav ul li a {
+        padding: 0.5rem;
+        justify-content: center;
+    }
+    
+    .header-right {
+        position: absolute;
+        top: 0.5rem;
+        right: 0.5rem;
+    }
+    
+    h2 {
+        font-size: 1.3rem;
+    }
+    
+    .form-row {
+        flex-direction: column;
+        gap: 0.7rem;
+    }
+    
+    .form-group {
+        width: 100%;
+    }
+    
+    #timer-time {
+        font-size: 2.5rem;
+    }
+    
+    .timer-buttons {
+        flex-direction: column;
+    }
+    
+    .export-actions {
+        flex-direction: column;
+    }
+    
+    .export-actions button {
+        width: 100%;
+    }
+    
+    .chart-options {
+        flex-wrap: wrap;
+    }
+    
+    #chart-area {
+        height: 300px;
     }
 }
 
@@ -577,7 +723,7 @@ footer {
         color: #f0f0f0;
     }
     
-    header {
+    .main-header {
         background-color: #2c3e50;
     }
     
@@ -591,7 +737,8 @@ footer {
     }
     
     .timer-container, form, .table-container, .debts-overview, 
-    .category-section, .rent-settings, .data-export, .deductions-summary {
+    .category-section, .rent-settings, .deductions-summary,
+    .filters-container, .graph-container, .export-actions {
         background-color: #1e1e1e;
         box-shadow: 0 2px 10px rgba(0, 0, 0, 0.3);
     }
@@ -617,10 +764,18 @@ footer {
         background-color: #2e2e2e;
     }
     
-    input, select {
+    .timer-person-select label:hover {
+        background-color: #3a3a3a;
+    }
+    
+    input, select, .chart-options button {
         background-color: #2a2a2a;
         border-color: #444;
         color: #f0f0f0;
+    }
+    
+    input:focus, select:focus {
+        border-color: #6d9eeb;
     }
     
     label {
@@ -632,25 +787,43 @@ footer {
         color: #ccc;
     }
     
-    td {
+    thead {
         border-bottom-color: #444;
     }
     
+    td {
+        border-bottom-color: #333;
+    }
+    
     tbody tr:nth-child(even) {
-        background-color: #252525;
+        background-color: #222;
+    }
+    
+    tbody tr:hover {
+        background-color: #2a3b4d;
     }
     
     #task-categories-list li, 
     #expense-categories-list li,
     .debts-list li {
-        border-bottom-color: #444;
+        border-bottom-color: #333;
     }
     
     .edit-btn {
         color: #6d9eeb;
     }
     
-    select {
-        background-image: url("data:image/svg+xml;charset=utf-8,%3Csvg xmlns='http://www.w3.org/2000/svg' width='16' height='16' viewBox='0 0 24 24' fill='none' stroke='%23ccc' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M6 9l6 6 6-6'/%3E%3C/svg%3E");
+    .chart-options button {
+        background-color: #2a2a2a;
+        color: #ccc;
+    }
+    
+    .chart-options button:hover {
+        background-color: #3a3a3a;
+    }
+    
+    .chart-options button.active {
+        background-color: #4a6da7;
+        color: white;
     }
 }
