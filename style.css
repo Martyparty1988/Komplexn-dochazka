@@ -1407,3 +1407,10 @@ select {
 select, select option {
     color-scheme: light dark;
 }
+/* Oprava zobrazení názvů sekcí v mobilní navigaci */
+@media (max-width: 992px) {
+  .main-nav ul li a span {
+    display: inline !important;
+    margin-left: 4px;
+  }
+}
