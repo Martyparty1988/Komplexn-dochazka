@@ -290,10 +290,23 @@ button#timer-stop {
     background-color: #dc3545;
 }
 
+.form-actions {
+    display: flex;
+    gap: 0.5rem;
+    margin-top: 1rem;
+}
+
+.form-actions button {
+    flex: 1;
+}
+
+button.cancel-button {
+    background-color: #6c757d;
+}
+
 form button[type="submit"] {
     display: block;
     width: 100%;
-    margin-top: 1rem;
 }
 
 /* Tables */
@@ -332,7 +345,24 @@ tbody tr:nth-child(even) {
     background-color: #f9f9f9;
 }
 
-/* Debts */
+/* Srážky */
+.deductions-summary {
+    background-color: white;
+    border-radius: 12px;
+    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+    padding: 1.2rem;
+    margin-bottom: 1.5rem;
+}
+
+.info-box {
+    background-color: #e8f4f8;
+    border-left: 4px solid #4a6da7;
+    padding: 0.8rem;
+    margin-bottom: 1rem;
+    border-radius: 4px;
+}
+
+/* Dluhy */
 .debts-overview {
     background-color: white;
     border-radius: 12px;
@@ -441,9 +471,8 @@ footer {
 }
 
 /* Delete button */
-.delete-btn {
+.delete-btn, .edit-btn {
     background-color: transparent;
-    color: #dc3545;
     border: none;
     padding: 0;
     border-radius: 50%;
@@ -455,8 +484,17 @@ footer {
     justify-content: center;
 }
 
-.delete-btn i {
-    font-size: 1rem;
+.delete-btn {
+    color: #dc3545;
+}
+
+.edit-btn {
+    color: #4a6da7;
+}
+
+.action-buttons {
+    display: flex;
+    gap: 0.3rem;
 }
 
 /* Offline notifikace */
@@ -553,9 +591,14 @@ footer {
     }
     
     .timer-container, form, .table-container, .debts-overview, 
-    .category-section, .rent-settings, .data-export {
+    .category-section, .rent-settings, .data-export, .deductions-summary {
         background-color: #1e1e1e;
         box-shadow: 0 2px 10px rgba(0, 0, 0, 0.3);
+    }
+    
+    .info-box {
+        background-color: #2a3b4d;
+        border-left-color: #6d9eeb;
     }
     
     #timer-time {
@@ -601,6 +644,10 @@ footer {
     #expense-categories-list li,
     .debts-list li {
         border-bottom-color: #444;
+    }
+    
+    .edit-btn {
+        color: #6d9eeb;
     }
     
     select {
