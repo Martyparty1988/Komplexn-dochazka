@@ -1,4 +1,5 @@
 document.addEventListener('DOMContentLoaded', () => {
+    // Základní DOM prvky
     const timerTimeDisplay = document.getElementById('timer-time');
     const timerStartButton = document.getElementById('timer-start');
     const timerPauseButton = document.getElementById('timer-pause');
@@ -8,6 +9,7 @@ document.addEventListener('DOMContentLoaded', () => {
     const timerActivityDisplay = document.getElementById('timer-activity-display');
 
     const manualEntryForm = document.getElementById('manual-entry-form');
+    const manualActivitySelect = document.getElementById('manual-activity');
     const workLogsTableBody = document.getElementById('work-logs-table');
 
     const financeForm = document.getElementById('finance-form');
@@ -20,6 +22,7 @@ document.addEventListener('DOMContentLoaded', () => {
     const taskCategoriesList = document.getElementById('task-categories-list');
     const addTaskCategoryButton = document.getElementById('add-task-category');
     const newTaskCategoryInput = document.getElementById('new-task-category');
+
     const expenseCategoriesList = document.getElementById('expense-categories-list');
     const addExpenseCategoryButton = document.getElementById('add-expense-category');
     const newExpenseCategoryInput = document.getElementById('new-expense-category');
@@ -32,10 +35,11 @@ document.addEventListener('DOMContentLoaded', () => {
     const exportFinanceButton = document.getElementById('export-finance');
     const exportDebtsButton = document.getElementById('export-debts');
 
+    // Globální proměnné
     let timerInterval;
     let isRunning = false;
-    let currentPerson = localStorage.getItem('currentTimerPerson') || 'maru'; // Default person for timer
-    let currentActivity = localStorage.getItem('currentTimerActivity') || ''; // Current activity being tracked
+    let currentPerson = localStorage.getItem('currentTimerPerson') || 'maru';
+    let currentActivity = localStorage.getItem('currentTimerActivity') || '';
 
     const hourlyRates = {
         maru: 275,
@@ -44,14 +48,14 @@ document.addEventListener('DOMContentLoaded', () => {
 
     // --- Local Storage ---
     const loadData = () => {
-        const workLogs = JSON.parse(localStorage.getItem('workLogs')) || [];
-        const finances = JSON.parse(localStorage.getItem('finances')) || [];
-        const debts = JSON.parse(localStorage.getItem('debts')) || [];
-        const rentSettings = JSON.parse(localStorage.getItem('rentSettings')) || { amount: 0, day: null };
-        const taskCategories = JSON.parse(localStorage.getItem('taskCategories')) || [];
-        const expenseCategories = JSON.parse(localStorage.getItem('expenseCategories')) || [];
-        const activities = JSON.parse(localStorage.getItem('activities')) || [];
-        return { workLogs, finances, debts, rentSettings, taskCategories, expenseCategories, activities };
+        return {
+            workLogs: JSON.parse(localStorage.getItem('workLogs')) || [],
+            finances: JSON.parse(localStorage.getItem('finances')) || [],
+            debts: JSON.parse(localStorage.getItem('debts')) || [],
+            rentSettings: JSON.parse(localStorage.getItem('rentSettings')) || { amount: 0, day: null },
+            taskCategories: JSON.parse(localStorage.getItem('taskCategories')) || [],
+            expenseCategories: JSON.parse(localStorage.getItem('expenseCategories')) || []
+        };
     };
 
     const saveData = (data) => {
@@ -61,12 +65,11 @@ document.addEventListener('DOMContentLoaded', () => {
         localStorage.setItem('rentSettings', JSON.stringify(data.rentSettings));
         localStorage.setItem('taskCategories', JSON.stringify(data.taskCategories));
         localStorage.setItem('expenseCategories', JSON.stringify(data.expenseCategories));
-        localStorage.setItem('activities', JSON.stringify(data.activities));
     };
 
-    let { workLogs, finances, debts, rentSettings, taskCategories, expenseCategories, activities } = loadData();
+    let { workLogs, finances, debts, rentSettings, taskCategories, expenseCategories } = loadData();
 
-    // --- Persistent Timer ---
+    // --- Helpers pro timer ---
     const getTimerState = () => {
         return {
             startTime: localStorage.getItem('timerStartTime') ? parseInt(localStorage.getItem('timerStartTime')) : null,
@@ -85,6 +88,7 @@ document.addEventListener('DOMContentLoaded', () => {
         localStorage.setItem('currentTimerActivity', activity);
     };
 
+    // Aktualizace časovače
     const updateTimerDisplay = () => {
         const timerState = getTimerState();
         
@@ -110,34 +114,44 @@ document.addEventListener('DOMContentLoaded', () => {
         timerTimeDisplay.textContent = `${String(hours).padStart(2, '0')}:${String(minutes).padStart(2, '0')}:${String(seconds).padStart(2, '0')}`;
         
         timerPersonDisplay.textContent = timerState.person === 'maru' ? 'Maru' : 'Marty';
-        timerActivityDisplay.textContent = timerState.activity;
+        timerActivityDisplay.textContent = timerState.activity || '';
     };
 
+    // Inicializace časovače
     const initializeTimer = () => {
         const timerState = getTimerState();
         isRunning = timerState.isRunning;
         currentPerson = timerState.person;
         currentActivity = timerState.activity;
 
-        // Update the UI based on stored state
-        document.querySelector(`#timer-person-select input[value="${currentPerson}"]`).checked = true;
-        if (timerActivitySelect) {
-            populateActivitySelect();
-            // Try to set the selected activity if it exists in the list
-            const activityOption = Array.from(timerActivitySelect.options).find(option => option.value === currentActivity);
-            if (activityOption) {
-                activityOption.selected = true;
+        // Nastavit radio button pro osobu
+        const personRadio = document.querySelector(`#timer-person-select input[value="${currentPerson}"]`);
+        if (personRadio) {
+            personRadio.checked = true;
+        }
+        
+        // Aktualizovat select s aktivitami
+        populateActivitySelects();
+        
+        // Nastavit aktivitu v selectu časovače
+        if (timerActivitySelect && currentActivity) {
+            for (let i = 0; i < timerActivitySelect.options.length; i++) {
+                if (timerActivitySelect.options[i].value === currentActivity) {
+                    timerActivitySelect.selectedIndex = i;
+                    break;
+                }
             }
         }
 
         updateTimerDisplay();
 
+        // Nastavit stav tlačítek podle stavu časovače
         if (isRunning) {
             timerStartButton.disabled = true;
             timerPauseButton.disabled = false;
             timerStopButton.disabled = false;
             
-            // Restart the interval for the running timer
+            // Restartovat interval
             timerInterval = setInterval(updateTimerDisplay, 1000);
         } else {
             timerStartButton.disabled = false;
@@ -146,27 +160,45 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     };
 
+    // Start časovače
     const startTimer = () => {
         const timerState = getTimerState();
         
         if (!isRunning) {
+            // Zkontrolovat, zda je vybrána aktivita
+            if (timerActivitySelect && timerActivitySelect.value === '') {
+                alert('Prosím vyberte úkol před spuštěním časovače');
+                return;
+            }
+            
             isRunning = true;
             
             let startTime;
             if (timerState.startTime && timerState.pauseTime) {
-                // Resume from pause - adjust the start time to account for the pause
+                // Pokračovat po pauze
                 const pauseDuration = Date.now() - timerState.pauseTime;
                 startTime = timerState.startTime + pauseDuration;
             } else {
-                // New timer
+                // Nový časovač
                 startTime = Date.now();
                 currentActivity = timerActivitySelect ? timerActivitySelect.value : '';
                 
-                // Save the activity if it's new and not empty
-                if (currentActivity && !activities.includes(currentActivity)) {
-                    activities.push(currentActivity);
-                    saveData({ workLogs, finances, debts, rentSettings, taskCategories, expenseCategories, activities });
-                    populateActivitySelect();
+                // Přidat novou kategorii úkolu, pokud neexistuje
+                if (currentActivity && !taskCategories.includes(currentActivity)) {
+                    taskCategories.push(currentActivity);
+                    saveData({ workLogs, finances, debts, rentSettings, taskCategories, expenseCategories });
+                    renderCategories();
+                    populateActivitySelects();
+                    
+                    // Znovu vybrat aktivitu
+                    if (timerActivitySelect) {
+                        for (let i = 0; i < timerActivitySelect.options.length; i++) {
+                            if (timerActivitySelect.options[i].value === currentActivity) {
+                                timerActivitySelect.selectedIndex = i;
+                                break;
+                            }
+                        }
+                    }
                 }
             }
             
@@ -181,6 +213,7 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     };
 
+    // Pauza časovače
     const pauseTimer = () => {
         const timerState = getTimerState();
         
@@ -196,6 +229,7 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     };
 
+    // Zastavení a uložení časovače
     const stopTimer = () => {
         const timerState = getTimerState();
         
@@ -204,7 +238,7 @@ document.addEventListener('DOMContentLoaded', () => {
             clearInterval(timerInterval);
             
             let runningTime;
-            if (isRunning) {
+            if (timerState.isRunning) {
                 runningTime = Date.now() - timerState.startTime;
             } else if (timerState.pauseTime) {
                 runningTime = timerState.pauseTime - timerState.startTime;
@@ -219,7 +253,7 @@ document.addEventListener('DOMContentLoaded', () => {
             const dateString = `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}-${String(now.getDate()).padStart(2, '0')}`;
 
             workLogs.push({
-                id: Date.now().toString(), // Unique ID for deletion
+                id: Date.now().toString(),
                 person: currentPerson,
                 date: dateString,
                 start: `${String(startTimeObj.getHours()).padStart(2, '0')}:${String(startTimeObj.getMinutes()).padStart(2, '0')}`,
@@ -230,9 +264,9 @@ document.addEventListener('DOMContentLoaded', () => {
                 activity: currentActivity
             });
             
-            saveData({ workLogs, finances, debts, rentSettings, taskCategories, expenseCategories, activities });
+            saveData({ workLogs, finances, debts, rentSettings, taskCategories, expenseCategories });
             
-            // Clear timer state
+            // Resetovat stav časovače
             saveTimerState(null, null, false, currentPerson, currentActivity);
             
             renderWorkLogs();
@@ -245,10 +279,12 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     };
 
+    // --- Event Listenery pro časovač ---
     timerStartButton.addEventListener('click', startTimer);
     timerPauseButton.addEventListener('click', pauseTimer);
     timerStopButton.addEventListener('click', stopTimer);
 
+    // Změna osoby pro časovač
     document.querySelectorAll('#timer-person-select input[type="radio"]').forEach(radio => {
         radio.addEventListener('change', (event) => {
             currentPerson = event.target.value;
@@ -256,32 +292,7 @@ document.addEventListener('DOMContentLoaded', () => {
         });
     });
 
-    // Populate activity dropdown from saved activities
-    const populateActivitySelect = () => {
-        if (!timerActivitySelect) return;
-        
-        // Save the current selection if any
-        const currentSelection = timerActivitySelect.value;
-        
-        // Clear current options except the first empty one
-        while (timerActivitySelect.options.length > 1) {
-            timerActivitySelect.remove(1);
-        }
-        
-        // Add saved activities
-        activities.forEach(activity => {
-            const option = document.createElement('option');
-            option.value = activity;
-            option.textContent = activity;
-            timerActivitySelect.appendChild(option);
-        });
-        
-        // Restore selection if it exists
-        if (currentSelection && Array.from(timerActivitySelect.options).some(option => option.value === currentSelection)) {
-            timerActivitySelect.value = currentSelection;
-        }
-    };
-
+    // Změna aktivity pro časovač
     if (timerActivitySelect) {
         timerActivitySelect.addEventListener('change', (e) => {
             currentActivity = e.target.value;
@@ -289,7 +300,80 @@ document.addEventListener('DOMContentLoaded', () => {
         });
     }
 
-    // --- Manual Work Log Entry ---
+    // --- Naplnění selectů s aktivitami ---
+    const populateActivitySelects = () => {
+        // Pro časovač
+        if (timerActivitySelect) {
+            const currentSelection = timerActivitySelect.value;
+            timerActivitySelect.innerHTML = '<option value="">-- Vyberte úkol --</option>';
+            
+            taskCategories.forEach(category => {
+                const option = document.createElement('option');
+                option.value = category;
+                option.textContent = category;
+                timerActivitySelect.appendChild(option);
+            });
+            
+            // Obnovit výběr
+            if (currentSelection) {
+                for (let i = 0; i < timerActivitySelect.options.length; i++) {
+                    if (timerActivitySelect.options[i].value === currentSelection) {
+                        timerActivitySelect.selectedIndex = i;
+                        break;
+                    }
+                }
+            }
+        }
+        
+        // Pro ruční zadání výkazu
+        if (manualActivitySelect) {
+            const currentSelection = manualActivitySelect.value;
+            manualActivitySelect.innerHTML = '<option value="">-- Vyberte úkol --</option>';
+            
+            taskCategories.forEach(category => {
+                const option = document.createElement('option');
+                option.value = category;
+                option.textContent = category;
+                manualActivitySelect.appendChild(option);
+            });
+            
+            // Obnovit výběr
+            if (currentSelection) {
+                for (let i = 0; i < manualActivitySelect.options.length; i++) {
+                    if (manualActivitySelect.options[i].value === currentSelection) {
+                        manualActivitySelect.selectedIndex = i;
+                        break;
+                    }
+                }
+            }
+        }
+        
+        // Pro finanční kategorie
+        const financeCategorySelect = document.getElementById('finance-category');
+        if (financeCategorySelect) {
+            const currentSelection = financeCategorySelect.value;
+            financeCategorySelect.innerHTML = '<option value="">-- Vyberte kategorii --</option>';
+            
+            expenseCategories.forEach(category => {
+                const option = document.createElement('option');
+                option.value = category;
+                option.textContent = category;
+                financeCategorySelect.appendChild(option);
+            });
+            
+            // Obnovit výběr
+            if (currentSelection) {
+                for (let i = 0; i < financeCategorySelect.options.length; i++) {
+                    if (financeCategorySelect.options[i].value === currentSelection) {
+                        financeCategorySelect.selectedIndex = i;
+                        break;
+                    }
+                }
+            }
+        }
+    };
+
+    // --- Ruční zadání výkazu ---
     manualEntryForm.addEventListener('submit', (e) => {
         e.preventDefault();
         const person = document.getElementById('manual-person').value;
@@ -297,12 +381,13 @@ document.addEventListener('DOMContentLoaded', () => {
         const startTimeStr = document.getElementById('manual-start-time').value;
         const endTimeStr = document.getElementById('manual-end-time').value;
         const breakTime = parseInt(document.getElementById('manual-break-time').value) || 0;
-        const activity = document.getElementById('manual-activity') ? document.getElementById('manual-activity').value : '';
+        const activity = manualActivitySelect ? manualActivitySelect.value : '';
 
+        // Validace času
         const startParts = startTimeStr.split(':');
         const endParts = endTimeStr.split(':');
 
-        if (startParts.length !== 2 || endParts.length !== 2 || isNaN(parseInt(startParts[0])) || isNaN(parseInt(startParts[1])) || isNaN(parseInt(endParts[0])) || isNaN(parseInt(endParts[1]))) {
+        if (startParts.length !== 2 || endParts.length !== 2) {
             alert('Neplatný formát času.');
             return;
         }
@@ -311,6 +396,11 @@ document.addEventListener('DOMContentLoaded', () => {
         const startMinute = parseInt(startParts[1]);
         const endHour = parseInt(endParts[0]);
         const endMinute = parseInt(endParts[1]);
+
+        if (isNaN(startHour) || isNaN(startMinute) || isNaN(endHour) || isNaN(endMinute)) {
+            alert('Neplatný formát času.');
+            return;
+        }
 
         const startDate = new Date(`${date}T${String(startHour).padStart(2, '0')}:${String(startMinute).padStart(2, '0')}:00`);
         const endDate = new Date(`${date}T${String(endHour).padStart(2, '0')}:${String(endMinute).padStart(2, '0')}:00`);
@@ -326,13 +416,17 @@ document.addEventListener('DOMContentLoaded', () => {
             return;
         }
 
-        // Save activity if it's new and not empty
-        if (activity && !activities.includes(activity)) {
-            activities.push(activity);
+        // Přidat aktivitu jako kategorii úkolu, pokud je nová
+        if (activity && !taskCategories.includes(activity)) {
+            taskCategories.push(activity);
+            saveData({ workLogs, finances, debts, rentSettings, taskCategories, expenseCategories });
+            renderCategories();
+            populateActivitySelects();
         }
 
+        // Přidat nový záznam
         workLogs.push({
-            id: Date.now().toString(), // Unique ID for deletion
+            id: Date.now().toString(),
             person,
             date,
             start: startTimeStr,
@@ -342,27 +436,40 @@ document.addEventListener('DOMContentLoaded', () => {
             earnings: (durationInMinutes / 60) * hourlyRates[person],
             activity
         });
-        saveData({ workLogs, finances, debts, rentSettings, taskCategories, expenseCategories, activities });
+        
+        saveData({ workLogs, finances, debts, rentSettings, taskCategories, expenseCategories });
         renderWorkLogs();
         manualEntryForm.reset();
-        populateActivitySelect(); // Update activity dropdown in case a new one was added
+        
+        // Nastavit dnešní datum
+        document.getElementById('manual-date').valueAsDate = new Date();
     });
 
-    // Function to delete a work log
+    // --- Smazání výkazu ---
     const deleteWorkLog = (id) => {
         const index = workLogs.findIndex(log => log.id === id);
         if (index !== -1) {
             if (confirm('Opravdu chcete smazat tento záznam?')) {
                 workLogs.splice(index, 1);
-                saveData({ workLogs, finances, debts, rentSettings, taskCategories, expenseCategories, activities });
+                saveData({ workLogs, finances, debts, rentSettings, taskCategories, expenseCategories });
                 renderWorkLogs();
             }
         }
     };
 
+    // --- Vykreslení seznamu výkazů ---
     const renderWorkLogs = () => {
         workLogsTableBody.innerHTML = '';
-        workLogs.forEach(log => {
+        
+        // Seřadit výkazy od nejnovějších
+        const sortedLogs = [...workLogs].sort((a, b) => {
+            // Nejprve podle data
+            const dateA = new Date(a.date + 'T' + a.start);
+            const dateB = new Date(b.date + 'T' + b.start);
+            return dateB - dateA;
+        });
+        
+        sortedLogs.forEach(log => {
             const row = workLogsTableBody.insertRow();
             row.insertCell().textContent = log.person === 'maru' ? 'Maru' : 'Marty';
             row.insertCell().textContent = log.date;
@@ -371,17 +478,18 @@ document.addEventListener('DOMContentLoaded', () => {
             row.insertCell().textContent = log.break;
             row.insertCell().textContent = `${Math.floor(log.worked / 60)}:${String(log.worked % 60).padStart(2, '0')}`;
             row.insertCell().textContent = `${log.earnings.toFixed(2)} CZK`;
-            
-            // Add activity column if not already existing
-            const activityCell = row.insertCell();
-            activityCell.textContent = log.activity || '';
+            row.insertCell().textContent = log.activity || '';
 
-            // Add delete button
+            // Tlačítko pro smazání
             const deleteCell = row.insertCell();
             const deleteButton = document.createElement('button');
             deleteButton.innerHTML = '<i class="fas fa-trash"></i>';
             deleteButton.className = 'delete-btn';
-            deleteButton.addEventListener('click', () => deleteWorkLog(log.id));
+            deleteButton.setAttribute('aria-label', 'Smazat záznam');
+            deleteButton.addEventListener('click', (e) => {
+                e.preventDefault();
+                deleteWorkLog(log.id);
+            });
             deleteCell.appendChild(deleteButton);
         });
     };
@@ -401,8 +509,17 @@ document.addEventListener('DOMContentLoaded', () => {
             return;
         }
 
+        // Přidat kategorii, pokud je nová
+        if (category && !expenseCategories.includes(category) && type === 'expense') {
+            expenseCategories.push(category);
+            saveData({ workLogs, finances, debts, rentSettings, taskCategories, expenseCategories });
+            renderCategories();
+            populateActivitySelects();
+        }
+
+        // Přidat nový záznam
         finances.push({ 
-            id: Date.now().toString(), // Unique ID for deletion
+            id: Date.now().toString(),
             type, 
             description, 
             amount, 
@@ -410,44 +527,83 @@ document.addEventListener('DOMContentLoaded', () => {
             date,
             category
         });
-        saveData({ workLogs, finances, debts, rentSettings, taskCategories, expenseCategories, activities });
+        
+        saveData({ workLogs, finances, debts, rentSettings, taskCategories, expenseCategories });
         renderFinances();
         financeForm.reset();
+        
+        // Nastavit dnešní datum
+        document.getElementById('finance-date').valueAsDate = new Date();
     });
 
-    // Function to delete a finance record
+    // --- Smazání finančního záznamu ---
     const deleteFinance = (id) => {
         const index = finances.findIndex(finance => finance.id === id);
         if (index !== -1) {
             if (confirm('Opravdu chcete smazat tento záznam?')) {
                 finances.splice(index, 1);
-                saveData({ workLogs, finances, debts, rentSettings, taskCategories, expenseCategories, activities });
+                saveData({ workLogs, finances, debts, rentSettings, taskCategories, expenseCategories });
                 renderFinances();
             }
         }
     };
 
+    // --- Vykreslení seznamu financí ---
     const renderFinances = () => {
         financeTableBody.innerHTML = '';
-        finances.forEach(finance => {
+        
+        // Seřadit finance od nejnovějších
+        const sortedFinances = [...finances].sort((a, b) => {
+            // Nejprve podle data
+            const dateA = new Date(a.date);
+            const dateB = new Date(b.date);
+            return dateB - dateA;
+        });
+        
+        sortedFinances.forEach(finance => {
             const row = financeTableBody.insertRow();
             row.insertCell().textContent = finance.type === 'income' ? 'Příjem' : 'Výdaj';
             row.insertCell().textContent = finance.description;
             row.insertCell().textContent = finance.amount;
             row.insertCell().textContent = finance.currency;
             row.insertCell().textContent = finance.date;
-            
-            // Add category column if not already existing
-            const categoryCell = row.insertCell();
-            categoryCell.textContent = finance.category || '';
+            row.insertCell().textContent = finance.category || '';
 
-            // Add delete button
+            // Tlačítko pro smazání
             const deleteCell = row.insertCell();
             const deleteButton = document.createElement('button');
             deleteButton.innerHTML = '<i class="fas fa-trash"></i>';
             deleteButton.className = 'delete-btn';
-            deleteButton.addEventListener('click', () => deleteFinance(finance.id));
+            deleteButton.setAttribute('aria-label', 'Smazat záznam');
+            deleteButton.addEventListener('click', (e) => {
+                e.preventDefault();
+                deleteFinance(finance.id);
+            });
             deleteCell.appendChild(deleteButton);
+        });
+    };
+
+    // --- Naplnění výběru dluhů ---
+    const populateDebtSelect = () => {
+        const debtSelect = document.getElementById('payment-debt-id');
+        if (!debtSelect) return;
+        
+        debtSelect.innerHTML = '<option value="">-- Vyberte dluh --</option>';
+        
+        // Získat vybranou osobu
+        const selectedPerson = document.getElementById('payment-person').value;
+        
+        // Přidat pouze dluhy pro vybranou osobu
+        const personDebts = debts.filter(debt => debt.person === selectedPerson);
+        
+        personDebts.forEach(debt => {
+            const remaining = debt.amount - (debt.paid || 0);
+            if (remaining > 0) {
+                const option = document.createElement('option');
+                option.value = debt.id;
+                option.textContent = `${debt.description}: ${remaining.toFixed(2)} ${debt.currency}`;
+                debtSelect.appendChild(option);
+            }
         });
     };
 
@@ -464,33 +620,42 @@ document.addEventListener('DOMContentLoaded', () => {
             return;
         }
 
+        // Přidat nový dluh
         debts.push({ 
-            id: Date.now().toString(), // Unique ID for deletion
+            id: Date.now().toString(),
             person, 
             description, 
             amount, 
             currency, 
             paid: 0 
         });
-        saveData({ workLogs, finances, debts, rentSettings, taskCategories, expenseCategories, activities });
+        
+        saveData({ workLogs, finances, debts, rentSettings, taskCategories, expenseCategories });
         renderDebts();
+        populateDebtSelect();
         debtForm.reset();
     });
 
+    // Aktualizovat seznam dluhů při změně osoby
+    if (document.getElementById('payment-person')) {
+        document.getElementById('payment-person').addEventListener('change', populateDebtSelect);
+    }
+
+    // Přidání splátky
     paymentForm.addEventListener('submit', (e) => {
         e.preventDefault();
         const person = document.getElementById('payment-person').value;
         const description = document.getElementById('payment-description').value;
         const amount = parseFloat(document.getElementById('payment-amount').value);
         const currency = document.getElementById('payment-currency').value;
-        const debtId = document.getElementById('payment-debt-id') ? document.getElementById('payment-debt-id').value : null;
+        const debtId = document.getElementById('payment-debt-id') ? document.getElementById('payment-debt-id').value : '';
 
         if (isNaN(amount)) {
             alert('Neplatná částka splátky.');
             return;
         }
 
-        // For simplicity, we'll just add a finance record for the payment
+        // Přidat záznam do financí
         finances.push({ 
             id: Date.now().toString(),
             type: 'expense', 
@@ -500,7 +665,7 @@ document.addEventListener('DOMContentLoaded', () => {
             date: new Date().toISOString().slice(0, 10) 
         });
         
-        // If a debt ID was specified, update the debt's paid amount
+        // Aktualizovat splátku v dluhu
         if (debtId) {
             const debt = debts.find(d => d.id === debtId);
             if (debt) {
@@ -508,26 +673,31 @@ document.addEventListener('DOMContentLoaded', () => {
             }
         }
         
-        saveData({ workLogs, finances, debts, rentSettings, taskCategories, expenseCategories, activities });
+        saveData({ workLogs, finances, debts, rentSettings, taskCategories, expenseCategories });
         renderFinances();
-        renderDebts(); // Update debts overview after payment
+        renderDebts();
+        populateDebtSelect();
         paymentForm.reset();
     });
 
-    // Function to delete a debt
+    // --- Smazání dluhu ---
     const deleteDebt = (id) => {
         const index = debts.findIndex(debt => debt.id === id);
         if (index !== -1) {
             if (confirm('Opravdu chcete smazat tento dluh?')) {
                 debts.splice(index, 1);
-                saveData({ workLogs, finances, debts, rentSettings, taskCategories, expenseCategories, activities });
+                saveData({ workLogs, finances, debts, rentSettings, taskCategories, expenseCategories });
                 renderDebts();
+                populateDebtSelect();
             }
         }
     };
 
+    // --- Vykreslení seznamu dluhů ---
     const renderDebts = () => {
         debtsListDiv.innerHTML = '';
+        
+        // Vytvořit objekt seskupený podle osob a měn
         const debtsByPerson = {};
         debts.forEach(debt => {
             if (!debtsByPerson[debt.person]) {
@@ -539,27 +709,37 @@ document.addEventListener('DOMContentLoaded', () => {
             debtsByPerson[debt.person][debt.currency].push(debt);
         });
 
+        // Vykreslit dluhy pro každou osobu a měnu
         for (const person in debtsByPerson) {
             const personDiv = document.createElement('div');
+            personDiv.className = 'debt-person';
             personDiv.innerHTML = `<h3>${person === 'maru' ? 'Maru' : 'Marty'}</h3>`;
+            
             for (const currency in debtsByPerson[person]) {
                 const currencyDiv = document.createElement('div');
+                currencyDiv.className = 'debt-currency';
                 currencyDiv.innerHTML = `<h4>${currency}</h4><ul class="debts-list"></ul>`;
                 const ul = currencyDiv.querySelector('ul');
+                
                 let totalDebt = 0;
                 let totalPaid = 0;
                 
                 debtsByPerson[person][currency].forEach(debt => {
                     const li = document.createElement('li');
                     li.dataset.id = debt.id;
-                    const remaining = debt.amount - (debt.paid || 0);
-                    li.textContent = `${debt.description}: ${debt.amount} ${debt.currency} (Zbývá: ${remaining.toFixed(2)} ${debt.currency})`;
                     
-                    // Add delete button for each debt
+                    const remaining = debt.amount - (debt.paid || 0);
+                    li.innerHTML = `<span>${debt.description}: ${debt.amount} ${debt.currency} (Zbývá: ${remaining.toFixed(2)} ${debt.currency})</span>`;
+                    
+                    // Tlačítko pro smazání
                     const deleteButton = document.createElement('button');
                     deleteButton.innerHTML = '<i class="fas fa-trash"></i>';
                     deleteButton.className = 'delete-btn';
-                    deleteButton.addEventListener('click', () => deleteDebt(debt.id));
+                    deleteButton.setAttribute('aria-label', 'Smazat dluh');
+                    deleteButton.addEventListener('click', (e) => {
+                        e.preventDefault();
+                        deleteDebt(debt.id);
+                    });
                     li.appendChild(deleteButton);
                     
                     ul.appendChild(li);
@@ -569,144 +749,137 @@ document.addEventListener('DOMContentLoaded', () => {
                 
                 const totalRemainingDebt = totalDebt - totalPaid;
                 const totalLi = document.createElement('li');
+                totalLi.className = 'debt-total';
                 totalLi.innerHTML = `<strong>Celkem: ${totalDebt.toFixed(2)} ${currency} (Zbývá: ${totalRemainingDebt.toFixed(2)} ${currency})</strong>`;
                 ul.appendChild(totalLi);
+                
                 personDiv.appendChild(currencyDiv);
             }
+            
             debtsListDiv.appendChild(personDiv);
         }
     };
 
     // --- Nastavení ---
     const renderCategories = () => {
-        // Task categories
-        taskCategoriesList.innerHTML = '';
-        taskCategories.forEach((category, index) => {
-            const li = document.createElement('li');
-            li.textContent = category;
-            
-            // Add delete button for each category
-            const deleteButton = document.createElement('button');
-            deleteButton.innerHTML = '<i class="fas fa-trash"></i>';
-            deleteButton.className = 'delete-btn';
-            deleteButton.addEventListener('click', () => {
-                if (confirm('Opravdu chcete smazat tuto kategorii?')) {
-                    taskCategories.splice(index, 1);
-                    saveData({ workLogs, finances, debts, rentSettings, taskCategories, expenseCategories, activities });
-                    renderCategories();
-                }
-            });
-            li.appendChild(deleteButton);
-            
-            taskCategoriesList.appendChild(li);
-        });
-
-        // Expense categories
-        expenseCategoriesList.innerHTML = '';
-        expenseCategories.forEach((category, index) => {
-            const li = document.createElement('li');
-            li.textContent = category;
-            
-            // Add delete button for each category
-            const deleteButton = document.createElement('button');
-            deleteButton.innerHTML = '<i class="fas fa-trash"></i>';
-            deleteButton.className = 'delete-btn';
-            deleteButton.addEventListener('click', () => {
-                if (confirm('Opravdu chcete smazat tuto kategorii?')) {
-                    expenseCategories.splice(index, 1);
-                    saveData({ workLogs, finances, debts, rentSettings, taskCategories, expenseCategories, activities });
-                    renderCategories();
-                }
-            });
-            li.appendChild(deleteButton);
-            
-            expenseCategoriesList.appendChild(li);
-        });
-
-        // Activities (for timer)
-        const activitiesList = document.getElementById('activities-list');
-        if (activitiesList) {
-            activitiesList.innerHTML = '';
-            activities.forEach((activity, index) => {
+        // Kategorie úkolů
+        if (taskCategoriesList) {
+            taskCategoriesList.innerHTML = '';
+            taskCategories.forEach((category, index) => {
                 const li = document.createElement('li');
-                li.textContent = activity;
+                li.innerHTML = `<span>${category}</span>`;
                 
-                // Add delete button for each activity
+                // Tlačítko pro smazání
                 const deleteButton = document.createElement('button');
                 deleteButton.innerHTML = '<i class="fas fa-trash"></i>';
                 deleteButton.className = 'delete-btn';
-                deleteButton.addEventListener('click', () => {
-                    if (confirm('Opravdu chcete smazat tuto činnost?')) {
-                        activities.splice(index, 1);
-                        saveData({ workLogs, finances, debts, rentSettings, taskCategories, expenseCategories, activities });
+                deleteButton.setAttribute('aria-label', 'Smazat kategorii');
+                deleteButton.addEventListener('click', (e) => {
+                    e.preventDefault();
+                    if (confirm('Opravdu chcete smazat tuto kategorii úkolu?')) {
+                        taskCategories.splice(index, 1);
+                        saveData({ workLogs, finances, debts, rentSettings, taskCategories, expenseCategories });
                         renderCategories();
-                        populateActivitySelect();
+                        populateActivitySelects();
                     }
                 });
                 li.appendChild(deleteButton);
                 
-                activitiesList.appendChild(li);
+                taskCategoriesList.appendChild(li);
+            });
+        }
+
+        // Kategorie výdajů
+        if (expenseCategoriesList) {
+            expenseCategoriesList.innerHTML = '';
+            expenseCategories.forEach((category, index) => {
+                const li = document.createElement('li');
+                li.innerHTML = `<span>${category}</span>`;
+                
+                // Tlačítko pro smazání
+                const deleteButton = document.createElement('button');
+                deleteButton.innerHTML = '<i class="fas fa-trash"></i>';
+                deleteButton.className = 'delete-btn';
+                deleteButton.setAttribute('aria-label', 'Smazat kategorii');
+                deleteButton.addEventListener('click', (e) => {
+                    e.preventDefault();
+                    if (confirm('Opravdu chcete smazat tuto kategorii výdajů?')) {
+                        expenseCategories.splice(index, 1);
+                        saveData({ workLogs, finances, debts, rentSettings, taskCategories, expenseCategories });
+                        renderCategories();
+                        populateActivitySelects();
+                    }
+                });
+                li.appendChild(deleteButton);
+                
+                expenseCategoriesList.appendChild(li);
             });
         }
     };
 
-    addTaskCategoryButton.addEventListener('click', () => {
-        const newCategory = newTaskCategoryInput.value.trim();
-        if (newCategory) {
-            taskCategories.push(newCategory);
-            saveData({ workLogs, finances, debts, rentSettings, taskCategories, expenseCategories, activities });
-            renderCategories();
-            newTaskCategoryInput.value = '';
-        }
-    });
-
-    addExpenseCategoryButton.addEventListener('click', () => {
-        const newCategory = newExpenseCategoryInput.value.trim();
-        if (newCategory) {
-            expenseCategories.push(newCategory);
-            saveData({ workLogs, finances, debts, rentSettings, taskCategories, expenseCategories, activities });
-            renderCategories();
-            newExpenseCategoryInput.value = '';
-        }
-    });
-
-    // Add activity button handler
-    const addActivityButton = document.getElementById('add-activity');
-    const newActivityInput = document.getElementById('new-activity');
-    
-    if (addActivityButton && newActivityInput) {
-        addActivityButton.addEventListener('click', () => {
-            const newActivity = newActivityInput.value.trim();
-            if (newActivity) {
-                activities.push(newActivity);
-                saveData({ workLogs, finances, debts, rentSettings, taskCategories, expenseCategories, activities });
-                renderCategories();
-                populateActivitySelect();
-                newActivityInput.value = '';
+    // Přidání kategorie úkolu
+    if (addTaskCategoryButton) {
+        addTaskCategoryButton.addEventListener('click', (e) => {
+            e.preventDefault();
+            const newCategory = newTaskCategoryInput.value.trim();
+            if (newCategory) {
+                if (!taskCategories.includes(newCategory)) {
+                    taskCategories.push(newCategory);
+                    saveData({ workLogs, finances, debts, rentSettings, taskCategories, expenseCategories });
+                    renderCategories();
+                    populateActivitySelects();
+                    newTaskCategoryInput.value = '';
+                } else {
+                    alert('Tato kategorie úkolu již existuje');
+                }
             }
         });
     }
 
-    if (rentSettings.amount) {
+    // Přidání kategorie výdajů
+    if (addExpenseCategoryButton) {
+        addExpenseCategoryButton.addEventListener('click', (e) => {
+            e.preventDefault();
+            const newCategory = newExpenseCategoryInput.value.trim();
+            if (newCategory) {
+                if (!expenseCategories.includes(newCategory)) {
+                    expenseCategories.push(newCategory);
+                    saveData({ workLogs, finances, debts, rentSettings, taskCategories, expenseCategories });
+                    renderCategories();
+                    populateActivitySelects();
+                    newExpenseCategoryInput.value = '';
+                } else {
+                    alert('Tato kategorie výdajů již existuje');
+                }
+            }
+        });
+    }
+
+    // Nastavení nájmu
+    if (rentSettings.amount && rentAmountInput) {
         rentAmountInput.value = rentSettings.amount;
     }
-    if (rentSettings.day) {
+    if (rentSettings.day && rentDayInput) {
         rentDayInput.value = rentSettings.day;
     }
 
-    saveRentSettingsButton.addEventListener('click', () => {
-        const amount = parseFloat(rentAmountInput.value);
-        const day = parseInt(rentDayInput.value);
-        if (!isNaN(amount) && !isNaN(day) && day >= 1 && day <= 31) {
-            rentSettings.amount = amount;
-            rentSettings.day = day;
-            saveData({ workLogs, finances, debts, rentSettings, taskCategories, expenseCategories, activities });
-            alert('Nastavení nájmu uloženo.');
-        } else {
-            alert('Neplatná výše nájmu nebo den v měsíci.');
-        }
-    });
+    if (saveRentSettingsButton) {
+        saveRentSettingsButton.addEventListener('click', (e) => {
+            e.preventDefault();
+            const amount = parseFloat(rentAmountInput.value);
+            const day = parseInt(rentDayInput.value);
+            if (!isNaN(amount) && !isNaN(day) && day >= 1 && day <= 31) {
+                rentSettings.amount = amount;
+                rentSettings.day = day;
+                saveData({ workLogs, finances, debts, rentSettings, taskCategories, expenseCategories });
+                alert('Nastavení nájmu uloženo.');
+            } else {
+                alert('Neplatná výše nájmu nebo den v měsíci.');
+            }
+        });
+    }
 
+    // --- Export dat ---
     const exportToCSV = (filename, rows) => {
         const processRow = function (row) {
             const finalVal = [];
@@ -729,63 +902,82 @@ document.addEventListener('DOMContentLoaded', () => {
         }
 
         const blob = new Blob([csvFile], { type: 'text/csv;charset=utf-8;' });
-        const link = document.createElement("a");
-        if (link.download !== undefined) {
-            const url = URL.createObjectURL(blob);
-            link.setAttribute("href", url);
-            link.setAttribute("download", filename);
-            link.style.visibility = 'hidden';
-            document.body.appendChild(link);
-            link.click();
-            document.body.removeChild(link);
+        
+        // Na iOS musíme použít jinou metodu pro stažení
+        if (/iPad|iPhone|iPod/.test(navigator.userAgent) && !window.MSStream) {
+            const url = window.URL.createObjectURL(blob);
+            window.location.href = url;
+            setTimeout(() => {
+                window.URL.revokeObjectURL(url);
+            }, 100);
+        } else {
+            const link = document.createElement("a");
+            if (link.download !== undefined) {
+                const url = URL.createObjectURL(blob);
+                link.setAttribute("href", url);
+                link.setAttribute("download", filename);
+                link.style.visibility = 'hidden';
+                document.body.appendChild(link);
+                link.click();
+                document.body.removeChild(link);
+            }
         }
     };
 
-    exportWorkLogsButton.addEventListener('click', () => {
-        const header = ['Osoba', 'Datum', 'Začátek', 'Konec', 'Pauza', 'Odpracováno (min)', 'Výdělek (CZK)', 'Činnost'];
-        const data = workLogs.map(log => [
-            log.person === 'maru' ? 'Maru' : 'Marty',
-            log.date,
-            log.start,
-            log.end,
-            log.break,
-            log.worked,
-            log.earnings.toFixed(2),
-            log.activity || ''
-        ]);
-        exportToCSV('work_logs.csv', [header, ...data]);
-    });
+    if (exportWorkLogsButton) {
+        exportWorkLogsButton.addEventListener('click', (e) => {
+            e.preventDefault();
+            const header = ['Osoba', 'Datum', 'Začátek', 'Konec', 'Pauza', 'Odpracováno (min)', 'Výdělek (CZK)', 'Úkol'];
+            const data = workLogs.map(log => [
+                log.person === 'maru' ? 'Maru' : 'Marty',
+                log.date,
+                log.start,
+                log.end,
+                log.break,
+                log.worked,
+                log.earnings.toFixed(2),
+                log.activity || ''
+            ]);
+            exportToCSV('work_logs.csv', [header, ...data]);
+        });
+    }
 
-    exportFinanceButton.addEventListener('click', () => {
-        const header = ['Typ', 'Popis', 'Částka', 'Měna', 'Datum', 'Kategorie'];
-        const data = finances.map(finance => [
-            finance.type === 'income' ? 'Příjem' : 'Výdaj',
-            finance.description,
-            finance.amount,
-            finance.currency,
-            finance.date,
-            finance.category || ''
-        ]);
-        exportToCSV('finance.csv', [header, ...data]);
-    });
+    if (exportFinanceButton) {
+        exportFinanceButton.addEventListener('click', (e) => {
+            e.preventDefault();
+            const header = ['Typ', 'Popis', 'Částka', 'Měna', 'Datum', 'Kategorie'];
+            const data = finances.map(finance => [
+                finance.type === 'income' ? 'Příjem' : 'Výdaj',
+                finance.description,
+                finance.amount,
+                finance.currency,
+                finance.date,
+                finance.category || ''
+            ]);
+            exportToCSV('finance.csv', [header, ...data]);
+        });
+    }
 
-    exportDebtsButton.addEventListener('click', () => {
-        const header = ['Osoba', 'Popis', 'Částka', 'Měna', 'Zaplaceno', 'Zbývá'];
-        const data = debts.map(debt => [
-            debt.person === 'maru' ? 'Maru' : 'Marty',
-            debt.description,
-            debt.amount,
-            debt.currency,
-            debt.paid || 0,
-            debt.amount - (debt.paid || 0)
-        ]);
-        exportToCSV('debts.csv', [header, ...data]);
-    });
+    if (exportDebtsButton) {
+        exportDebtsButton.addEventListener('click', (e) => {
+            e.preventDefault();
+            const header = ['Osoba', 'Popis', 'Částka', 'Měna', 'Zaplaceno', 'Zbývá'];
+            const data = debts.map(debt => [
+                debt.person === 'maru' ? 'Maru' : 'Marty',
+                debt.description,
+                debt.amount,
+                debt.currency,
+                debt.paid || 0,
+                debt.amount - (debt.paid || 0)
+            ]);
+            exportToCSV('debts.csv', [header, ...data]);
+        });
+    }
 
+    // --- Přepínání sekcí ---
     const sections = document.querySelectorAll('main > section');
     const navLinks = document.querySelectorAll('header nav ul li a');
 
-    // --- Přepínání sekcí ---
     const showSection = (sectionId) => {
         sections.forEach(section => {
             section.classList.remove('active');
@@ -802,7 +994,7 @@ document.addEventListener('DOMContentLoaded', () => {
             }
         });
 
-        // Update URL hash without triggering a page reload
+        // Aktualizovat URL hash bez přenačtení stránky
         history.pushState(null, null, `#${sectionId}`);
     };
 
@@ -810,39 +1002,81 @@ document.addEventListener('DOMContentLoaded', () => {
         link.addEventListener('click', (e) => {
             e.preventDefault();
             const sectionId = link.getAttribute('data-section');
-            showSection(sectionId);
+            if (sectionId) {
+                showSection(sectionId);
+            }
         });
     });
 
-    // Window visibility change handling for timer
+    // --- Detekce změny viditelnosti stránky ---
     document.addEventListener('visibilitychange', () => {
         if (document.visibilityState === 'visible') {
-            // Update the timer display when the page becomes visible again
+            // Aktualizovat časovač při návratu na stránku
             updateTimerDisplay();
             
             const timerState = getTimerState();
             if (timerState.isRunning && !timerInterval) {
-                // Restart the interval if the timer should be running
+                // Restartovat interval, pokud má časovač běžet
                 timerInterval = setInterval(updateTimerDisplay, 1000);
             }
         }
     });
 
-    // Handle browser window unload
+    // --- Před zavřením okna ---
     window.addEventListener('beforeunload', () => {
-        // Make sure the timer state is saved
+        // Uložit stav časovače
         const timerState = getTimerState();
         if (timerState.isRunning) {
-            // Timer is running, save the current state
             saveTimerState(timerState.startTime, null, true, timerState.person, timerState.activity);
         }
     });
 
-    // Při načtení stránky zobrazit výchozí sekci
+    // --- Detekce offline režimu ---
+    const offlineNotification = document.getElementById('offline-notification');
+    
+    window.addEventListener('online', () => {
+        if (offlineNotification) {
+            offlineNotification.classList.remove('show');
+        }
+    });
+    
+    window.addEventListener('offline', () => {
+        if (offlineNotification) {
+            offlineNotification.classList.add('show');
+            
+            setTimeout(() => {
+                offlineNotification.classList.remove('show');
+            }, 5000);
+        }
+    });
+
+    // --- Nastavení datumů ve formulářích ---
+    ['manual-date', 'finance-date'].forEach(id => {
+        const element = document.getElementById(id);
+        if (element) {
+            element.valueAsDate = new Date();
+        }
+    });
+
+    // --- Oprava touchstart události pro iOS ---
+    if (/iPad|iPhone|iPod/.test(navigator.userAgent) && !window.MSStream) {
+        document.querySelectorAll('button, select, input[type="radio"]').forEach(el => {
+            el.addEventListener('touchstart', function(e) {
+                // Tato prázdná funkce zajistí, že element reaguje na dotyk na iOS
+            }, { passive: true });
+        });
+    }
+
+    // --- Při načtení stránky zobrazit výchozí sekci ---
     if (window.location.hash) {
-        showSection(window.location.hash.substring(1));
+        const sectionId = window.location.hash.substring(1);
+        if (document.getElementById(sectionId)) {
+            showSection(sectionId);
+        } else {
+            showSection('vyskazy');
+        }
     } else {
-        showSection('vyskazy'); // Zobrazit výkazy jako výchozí
+        showSection('vyskazy');
     }
 
     // --- Initial Render ---
@@ -850,13 +1084,14 @@ document.addEventListener('DOMContentLoaded', () => {
     renderFinances();
     renderDebts();
     renderCategories();
-    populateActivitySelect();
+    populateActivitySelects();
+    populateDebtSelect();
     initializeTimer();
 
-    // Synchronize the timer across browser tabs/windows
+    // --- Synchronizace časovače mezi záložkami ---
     window.addEventListener('storage', (event) => {
         if (event.key === 'timerStartTime' || event.key === 'timerPauseTime' || event.key === 'timerIsRunning') {
-            // Timer state changed in another tab, update the UI
+            // Stav časovače se změnil v jiné záložce, aktualizovat UI
             clearInterval(timerInterval);
             initializeTimer();
         }
